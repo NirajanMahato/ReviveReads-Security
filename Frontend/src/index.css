@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Gilroy Regular", Poppins ,Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+::selection{
+  background-color: #979aa1;
+}
+
+@font-face {
+  font-family: Gilroy Light;
+  src: url("/Fonts/Gilroy-Light.ttf") format('truetype');
+}
+@font-face {
+  font-family: Gilroy Regular;
+  src: url("/Fonts/Gilroy-Regular.ttf") format('truetype');
+}
+@font-face {
+  font-family: Gilroy Medium;
+  src: url("/Fonts/Gilroy-Medium.ttf") format('truetype');
+}
+@font-face {
+  font-family: Gilroy Bold;
+  src: url("/Fonts/Gilroy-Bold.ttf") format('truetype');
+}
+@font-face {
+  font-family: Gilroy SemiBold;
+  src: url("/Fonts/Gilroy-SemiBold.ttf") format('truetype');
+}
+@font-face {
+  font-family: PP mori;
+  src: url("/Fonts/PPMori-SemiBold.otf") format('truetype');
+}
+
+.black-to-white {
+  filter: invert(100%) brightness(100%);
+}
+
+input {
+  outline: none;
+  /* -webkit-box-shadow: 0 0 0 30px transparent inset; */
+}
+/*to remove 'X' from input*/
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+/*file input custom CSS*/
+::-webkit-file-upload-button{
+  background-image: linear-gradient(0deg, #B6BBC4, rgb(0, 0, 0));
+  background-color: #B6BBC4;
+  color: #050505;
+  padding: 7px 6px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* Hide arrows in Chrome, Safari, Edge, and Opera */
+.no-arrows::-webkit-outer-spin-button,
+.no-arrows::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+/* SHAKE ANIMATION ON HORIZONTAL DIRECTION */
+.shake {
+	animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) 0.2s both;
+	transform: translate3d(0, 0, 0);
+	backface-visibility: hidden;
+	perspective: 1000px;
+}
+
+@keyframes shake {
+	10%,
+	90% {
+		transform: translate3d(-1px, 0, 0);
+	}
+
+	20%,
+	80% {
+		transform: translate3d(2px, 0, 0);
+	}
+
+	30%,
+	50%,
+	70% {
+		transform: translate3d(-4px, 0, 0);
+	}
+
+	40%,
+	60% {
+		transform: translate3d(4px, 0, 0);
+	}
+}

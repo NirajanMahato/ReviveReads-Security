@@ -1,0 +1,53 @@
+{
+  "name": "revivereads-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@reduxjs/toolkit": "^2.5.0",
+    "@tanstack/react-query": "^5.17.15",
+    "@tanstack/react-table": "^8.20.6",
+    "axios": "^1.7.9",
+    "chart.js": "^4.4.7",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.2",
+    "react-hot-toast": "^2.4.1",
+    "react-icons": "^5.4.0",
+    "react-image-file-resizer": "^0.4.8",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.28.0",
+    "react-scroll": "^1.9.0",
+    "socket.io-client": "^4.8.0",
+    "yup": "^1.6.1",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.4",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.23",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16",
+    "vite": "^6.0.1"
+  }
+}

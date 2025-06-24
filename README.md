@@ -8,6 +8,36 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 ---
 
+## Tools & Technologies Used
+
+### Backend
+
+- **Node.js** (JavaScript runtime)
+- **Express.js** (Web framework)
+- **MongoDB** (Database)
+- **Mongoose** (MongoDB ODM)
+- **bcryptjs** (Password hashing)
+- **jsonwebtoken** (JWT authentication)
+- **nodemailer** (Email sending)
+- **multer** (File uploads)
+- **dotenv** (Environment variable management)
+- **socket.io** (Real-time communication)
+- **Mocha, Chai, Supertest** (Testing)
+
+### Frontend
+
+- **React.js** (UI library)
+- **Vite** (Build tool)
+- **Redux Toolkit** (State management)
+- **React Router** (Routing)
+- **Yup & React Hook Form** (Form validation)
+- **Axios** (HTTP requests)
+- **Tailwind CSS** (Styling)
+- **Playwright** (End-to-end testing)
+- **React Hot Toast** (Notifications)
+
+---
+
 ## Setup Instructions
 
 ### Backend

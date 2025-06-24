@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Conversation = require("../models/Conversation");
+const mongoose = require("mongoose");
 
 //Get all users information
 const getAllUsers = async (req, res) => {
@@ -189,6 +190,9 @@ const verifyOTP = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
     const data = await User.findById(id).select("-password");
     return res.status(200).json(data);
   } catch (error) {
@@ -218,6 +222,9 @@ const updateData = async (req, res) => {
 const deleteById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
     const data = await User.findByIdAndDelete(id);
     if (data == null) {
       res.status(404).json({ message: "User not found" });

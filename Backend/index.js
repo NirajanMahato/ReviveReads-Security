@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
+const xss = require("xss-clean");
 const { app, server } = require("./socket/socket");
 const cors = require("cors");
 const connectDB = require("./config/db");
@@ -9,14 +10,16 @@ const bookRoutes = require("./router/bookRoutes");
 const messageRoutes = require("./router/messageRoutes");
 const notificationRoutes = require("./router/notificationRoutes");
 const adminRoutes = require("./router/adminRoutes");
-const path = require("path");
 
 connectDB();
 const PORT = process.env.PORT ? process.env.PORT : 5000;
 
-app.use(helmet());
 app.use(cors());
-app.use(express.json());
+
+
+app.use(helmet());
+app.use(xss());
+app.use(express.json({ limit: "10mb" }));
 
 app.use("/api/user", userRoutes);
 app.use("/api/book", bookRoutes);

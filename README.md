@@ -110,7 +110,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 ---
 
-## Authors
+## Author
 
 - Nirajan Mahato
 

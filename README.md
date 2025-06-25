@@ -22,7 +22,12 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - **multer** (File uploads)
 - **dotenv** (Environment variable management)
 - **socket.io** (Real-time communication)
-- **Mocha, Chai, Supertest** (Testing)
+- **helmet** (Security HTTP headers, CSP)
+- **xss-clean** (XSS protection)
+- **express-rate-limit** (Rate limiting)
+- **morgan** (HTTP request logging)
+- **winston** (Advanced logging)
+
 
 ### Frontend
 
@@ -50,7 +55,8 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
    - `EMAIL_USER=your_email@gmail.com`
    - `EMAIL_PASS=your_email_password`
    - `FRONTEND_URL=http://localhost:5173` (or your frontend URL)
-4. Start the server: `npm run dev`
+4. **Create a `logs/` directory** in `Backend` for logging if it does not exist: `mkdir logs`
+5. Start the server: `npm run dev`
 
 ### Frontend
 
@@ -88,6 +94,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Frontend uses Yup for form validation (registration, login, password reset, etc.).
 - Backend checks for required fields and validates password length.
 - Email and phone number formats are validated.
+- All MongoDB ObjectIds are validated before DB queries to prevent NoSQL injection.
 
 ### 6. **File Upload Security**
 
@@ -102,11 +109,40 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 ### 8. **CORS Protection**
 
-- CORS is enabled and can be restricted to specific frontend origins.
+- CORS is enabled and restricted to specific frontend origins.
 
 ### 9. **Error Handling**
 
 - Generic error messages are returned to avoid leaking sensitive information.
+
+### 10. **Request Size Limiting**
+
+- The request body size is limited to 10MB.
+
+### 11. **Rate Limiting**
+
+- Sensitive authentication routes (login, OTP, password reset) are rate-limited to prevent brute-force attacks.
+
+### 12. **XSS Protection**
+
+- All user input is sanitized using `xss-clean` middleware.
+
+### 13. **Advanced Content Security Policy (CSP)**
+
+- Strict CSP is enforced using helmet to restrict sources of scripts, styles, images, etc.
+- CSP violation reporting is enabled.
+
+### 14. **HTTP Security Headers**
+
+- `helmet` is used to set headers for clickjacking, MIME sniffing, and other common web vulnerabilities.
+
+### 15. **HTTP Request Logging**
+
+- All HTTP requests are logged using `morgan` and stored with `winston` in `logs/combined.log` and `logs/error.log`.
+
+### 16. **Environment Variable Validation**
+
+- The app will not start if any required environment variable is missing, preventing insecure or misconfigured deployments.
 
 ---
 

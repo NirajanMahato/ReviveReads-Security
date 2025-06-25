@@ -16,7 +16,7 @@ const PORT = process.env.PORT ? process.env.PORT : 5000;
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:4004",
+    origin: process.env.FRONTEND_URL || "http://localhost:4000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -32,9 +32,8 @@ app.use("/api/book", bookRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/product_images", express.static("product_images"));
 
-// server.js
+app.use("/api/product_images", express.static("product_images"));
 app.use("/api/uploads/users", express.static("uploads/users"));
 app.use("/api/uploads/books", express.static("uploads/books"));
 

@@ -28,13 +28,12 @@ const morganMiddleware = morgan("combined", {
 // Rate limiter for authentication routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  max: 5,
   message: "Too many attempts, please try again later.",
 });
 
 // Function to apply all global security middlewares
 function applySecurityMiddlewares(app) {
-  // Logging
   app.use(morganMiddleware);
 
   app.use(
@@ -55,7 +54,7 @@ function applySecurityMiddlewares(app) {
         fontSrc: ["'self'", "https:", "data:"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
-        reportUri: ["/csp-violation-report-endpoint"], // CSP violation reporting
+        reportUri: ["/csp-violation-report-endpoint"],
       },
       reportOnly: false,
     })
@@ -69,8 +68,3 @@ module.exports = {
   authLimiter,
   logger,
 };
-
-// Usage:
-// In index.js: applySecurityMiddlewares(app);
-// For rate limiting: use authLimiter on sensitive routes
-// Logs are written to logs/error.log and logs/combined.log

@@ -55,19 +55,16 @@ const signUp = async (req, res) => {
   try {
     const { name, email, password, address, avatar } = req.body;
 
-    //Check if email already exists
     const existingEmail = await User.findOne({ email: email });
     if (existingEmail) {
       return res.status(400).json({ message: "Email already exists " });
     }
 
-    //check password's length
     if (password.length <= 5) {
       return res
         .status(400)
         .json({ message: "Password length should be greater than 5" });
     }
-    //Hash the password
     const hashedPass = await bcrypt.hash(password, 10);
 
     const userData = {
@@ -106,7 +103,6 @@ const signUp = async (req, res) => {
         `,
     });
 
-    // Log successful registration
     await logUserActivity(req, res, "REGISTER", "auth", {
       resourceId: newUser._id,
       details: { registrationMethod: "email" },
@@ -135,7 +131,6 @@ const signIn = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      // Log failed login attempt
       await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
         status: "failed",
         severity: "medium",
@@ -154,7 +149,6 @@ const signIn = async (req, res) => {
       await existingUser.save();
 
       try {
-        // Send OTP via email
         const transporter = nodemailer.createTransport({
           host: "smtp.gmail.com",
           port: 587,
@@ -172,7 +166,6 @@ const signIn = async (req, res) => {
           html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
         });
 
-        // Log OTP sent
         await logUserActivity(req, res, "OTP_SENT", "auth", {
           resourceId: existingUser._id,
           details: { email },
@@ -190,7 +183,6 @@ const signIn = async (req, res) => {
       } catch (emailError) {
         console.error("Email sending error:", emailError);
 
-        // Clear OTP if email fails
         existingUser.twoFactorOTP = undefined;
         existingUser.twoFactorOTPExpires = undefined;
         await existingUser.save();
@@ -202,7 +194,6 @@ const signIn = async (req, res) => {
         });
       }
     } else {
-      // Log failed login attempt
       await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
         status: "failed",
         severity: "medium",
@@ -244,7 +235,6 @@ const verifyOTP = async (req, res) => {
         `Invalid OTP attempt for user ${email}. Expected: ${user.twoFactorOTP}, Received: ${otp}`
       );
 
-      // Log failed OTP attempt
       await logUserActivity(req, res, "OTP_FAILED", "auth", {
         status: "failed",
         severity: "medium",
@@ -255,7 +245,6 @@ const verifyOTP = async (req, res) => {
     }
 
     if (user.twoFactorOTPExpires < Date.now()) {
-      // Clear expired OTP
       user.twoFactorOTP = undefined;
       user.twoFactorOTPExpires = undefined;
       await user.save();
@@ -286,7 +275,6 @@ const verifyOTP = async (req, res) => {
       { expiresIn: "3d" }
     );
 
-    // Set JWT as httpOnly cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
@@ -294,7 +282,6 @@ const verifyOTP = async (req, res) => {
       maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
     });
 
-    // Set user ID as httpOnly cookie
     res.cookie("userId", user._id.toString(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -302,7 +289,6 @@ const verifyOTP = async (req, res) => {
       maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
     });
 
-    // Log successful login
     await logUserActivity(req, res, "LOGIN_SUCCESS", "auth", {
       resourceId: user._id,
       details: { loginMethod: "2FA" },
@@ -384,7 +370,6 @@ const forgotPassword = async (req, res) => {
         .json({ message: "User with this email does not exist" });
     }
 
-    // Generate reset token
     const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
@@ -394,7 +379,6 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
-    // Send email
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -437,7 +421,6 @@ const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({
       _id: decoded.id,
@@ -452,7 +435,6 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update password and clear reset token
@@ -530,26 +512,22 @@ const getFavouriteBook = async (req, res) => {
   }
 };
 
-//
 const getUsersForSidebar = async (req, res) => {
   try {
-    const loggedInUserId = req.user.id; // Current logged-in user ID
+    const loggedInUserId = req.user.id;
 
-    // Find conversations where the current user is a participant
     const conversations = await Conversation.find({
       participants: loggedInUserId,
-    }).populate("participants", "-password"); // Populate user details excluding password
+    }).populate("participants", "-password");
 
-    // Extract unique users from the conversations
     const users = [];
     conversations.forEach((conversation) => {
       conversation.participants.forEach((participant) => {
-        // Add only other participants (exclude the logged-in user)
         if (
-          participant._id.toString() !== loggedInUserId && // Exclude self
+          participant._id.toString() !== loggedInUserId &&
           !users.some(
             (user) => user._id.toString() === participant._id.toString()
-          ) // Avoid duplicates
+          )
         ) {
           users.push(participant);
         }

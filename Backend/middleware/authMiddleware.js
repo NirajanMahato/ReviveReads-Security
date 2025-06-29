@@ -9,7 +9,7 @@ const verifyAdmin = async (req, res, next) => {
       return res.status(401).json({ message: "No token provided!" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
 
     if (!user || user.role !== "admin") {
@@ -18,7 +18,7 @@ const verifyAdmin = async (req, res, next) => {
         .json({ message: "Access denied! Admin privileges required." });
     }
 
-    req.user = user; // Attach user info to request object
+    req.user = user;
     next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized access!" });

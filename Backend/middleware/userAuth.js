@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 const authenticateToken = (req, res, next) => {
-  // Read token from httpOnly cookie instead of Authorization header
   const token = req.cookies.token;
   const userId = req.cookies.userId;
 
@@ -16,7 +15,7 @@ const authenticateToken = (req, res, next) => {
         .json({ message: "Token expired. Please sign-in again" });
     }
     req.user = user;
-    req.userId = userId; // Add userId to request object
+    req.userId = userId;
     next();
   });
 };

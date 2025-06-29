@@ -31,28 +31,22 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
   if (userId != "undefined") {
     userSocketMap[userId] = socket.id;
-    
-    // Emit online users on new connection
+
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   }
 
-  // Handle disconnection
   socket.on("disconnect", () => {
-    // console.log("user disconnected", socket.id);
     if (userId != "undefined") {
       delete userSocketMap[userId];
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     }
   });
 
-  // Listen for new notifications subscription
   socket.on("subscribeToNotifications", (userId) => {
     socket.join(`notifications:${userId}`);
   });
 
-  // Listen for notification acknowledgment
   socket.on("notificationRead", (notificationId) => {
-    // You can handle notification read status here if needed
     console.log("Notification read:", notificationId);
   });
 });

@@ -27,7 +27,6 @@ const userSchema = mongoose.Schema(
     lastActivity: { type: Date, default: Date.now },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    // 2FA fields
     twoFactorOTP: String,
     twoFactorOTPExpires: Date,
   },

@@ -20,7 +20,6 @@ const activityLogSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        // Authentication actions
         "LOGIN_ATTEMPT",
         "LOGIN_SUCCESS",
         "LOGIN_FAILED",
@@ -33,12 +32,10 @@ const activityLogSchema = new mongoose.Schema(
         "OTP_VERIFIED",
         "OTP_FAILED",
 
-        // User profile actions
         "PROFILE_UPDATE",
         "AVATAR_UPLOAD",
         "PROFILE_VIEW",
 
-        // Book actions
         "BOOK_CREATE",
         "BOOK_UPDATE",
         "BOOK_DELETE",
@@ -49,22 +46,18 @@ const activityLogSchema = new mongoose.Schema(
         "BOOK_FAVORITE_ADD",
         "BOOK_FAVORITE_REMOVE",
 
-        // Messaging actions
         "MESSAGE_SEND",
         "MESSAGE_READ",
         "CONVERSATION_CREATE",
         "CONVERSATION_VIEW",
 
-        // Notification actions
         "NOTIFICATION_READ",
         "NOTIFICATION_DELETE",
 
-        // Admin actions
         "USER_DELETE",
         "USER_STATUS_UPDATE",
         "SYSTEM_SETTINGS_UPDATE",
 
-        // Security events
         "SUSPICIOUS_ACTIVITY",
         "RATE_LIMIT_EXCEEDED",
         "INVALID_TOKEN",
@@ -73,7 +66,6 @@ const activityLogSchema = new mongoose.Schema(
         "FILE_UPLOAD_SUCCESS",
         "FILE_UPLOAD_FAILED",
 
-        // System events
         "SESSION_EXPIRED",
         "ACCOUNT_LOCKED",
         "ACCOUNT_UNLOCKED",
@@ -86,7 +78,7 @@ const activityLogSchema = new mongoose.Schema(
     },
     resourceId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: false, // Optional for system-wide actions
+      required: false,
     },
     details: {
       type: mongoose.Schema.Types.Mixed,
@@ -126,7 +118,6 @@ const activityLogSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    // Create indexes for efficient querying
     indexes: [
       { userId: 1, createdAt: -1 },
       { action: 1, createdAt: -1 },
@@ -138,7 +129,6 @@ const activityLogSchema = new mongoose.Schema(
   }
 );
 
-// Add TTL index to automatically delete old logs (keep for 1 year)
 activityLogSchema.index(
   { createdAt: 1 },
   { expireAfterSeconds: 365 * 24 * 60 * 60 }

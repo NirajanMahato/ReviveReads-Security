@@ -16,6 +16,8 @@ const {
   resetPassword,
   uploadImage,
   verifyOTP,
+  getCurrentUser,
+  logout,
 } = require("../controller/userController");
 const { authenticateToken } = require("../middleware/userAuth");
 const { uploadUserAvatar } = require("../config/multerConfig");
@@ -23,7 +25,7 @@ const { authLimiter } = require("../middleware/security");
 
 router.post("/uploadImage", uploadUserAvatar, uploadImage);
 router.post("/sign-up", signUp);
-router.post("/sign-in", authLimiter, signIn);
+router.post("/sign-in", signIn);
 router.get("/get-all-users", authenticateToken, getAllUsers);
 router.get("/get-user-by-id/:id", getUserById);
 router.delete("/:id", deleteById);
@@ -43,5 +45,8 @@ router.get("/get-favorites-books", authenticateToken, getFavouriteBook);
 router.patch("/", uploadUserAvatar, authenticateToken, updateData);
 
 router.post("/verify-otp", authLimiter, verifyOTP);
+
+router.get("/me", authenticateToken, getCurrentUser);
+router.post("/logout", logout);
 
 module.exports = router;

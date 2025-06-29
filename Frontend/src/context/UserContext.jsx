@@ -8,54 +8,59 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refresh, setRefresh] = useState(0); // Add refresh counter
+  const [refresh, setRefresh] = useState(0);
   const dispatch = useDispatch();
-
-  // Access token and user ID from localStorage
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("id");
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      if (userId && token) {
-        try {
-          const response = await axios.get(`/api/user/get-user-by-id/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          setUserInfo(response.data);
-        } catch (error) {
-          console.error("Error fetching user info:", error);
-          if (error.response?.status === 401) {
-            logout();
-          }
-        }
-      } else {
+      try {
+        // Make request with credentials to get user info from cookies
+        const response = await axios.get("/api/user/me", {
+          withCredentials: true,
+        });
+        setUserInfo(response.data);
+        // Update Redux state
+        dispatch(authActions.login());
+        dispatch(authActions.changeRole(response.data.role));
+      } catch (error) {
+        // Silently handle auth errors - user is not logged in
         setUserInfo(null);
+        dispatch(authActions.logout());
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchUserInfo();
-  }, [userId, token, refresh]); // Add refresh to dependency array
+  }, [refresh, dispatch]);
 
-  const logout = () => {
-    dispatch(authActions.logout());
-    localStorage.removeItem("id");
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setUserInfo(null);
-    window.location.href = "/";
+  const logout = async () => {
+    try {
+      // Call logout endpoint to clear cookies
+      await axios.post(
+        "/api/user/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+    } catch (error) {
+      // Continue with logout even if API call fails
+    } finally {
+      dispatch(authActions.logout());
+      setUserInfo(null);
+      window.location.href = "/";
+    }
   };
 
-  // Add refreshUserInfo function
   const refreshUserInfo = () => {
-    setRefresh(prev => prev + 1);
+    setRefresh((prev) => prev + 1);
   };
 
   return (
-    <UserContext.Provider value={{ userInfo, setUserInfo, loading, logout, refreshUserInfo }}>
+    <UserContext.Provider
+      value={{ userInfo, setUserInfo, loading, logout, refreshUserInfo }}
+    >
       {children}
     </UserContext.Provider>
   );

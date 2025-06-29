@@ -9,7 +9,6 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { SocketContextProvider } from "./context/SocketContext";
 import { UserProvider } from "./context/UserContext";
 import useUpdateUserStatus from "./hooks/useUpdateUserStatus";
-import { authActions } from "./store/auth";
 
 // Lazy-loaded components (keeping your existing imports)
 const Home = lazy(() => import("./core/public/homePage/Home"));
@@ -41,17 +40,9 @@ function App() {
   useUpdateUserStatus();
 
   useEffect(() => {
-    if (
-      localStorage.getItem("id") &&
-      localStorage.getItem("token") &&
-      localStorage.getItem("role")
-    ) {
-      const roleFromLocalStorage = localStorage.getItem("role");
-      dispatch(authActions.login());
-      dispatch(authActions.changeRole(roleFromLocalStorage));
-    }
+    // The UserContext will handle authentication state from cookies
     setLoading(false);
-  }, [dispatch]);
+  }, []);
 
   if (loading) {
     return <LoadingScreen />;

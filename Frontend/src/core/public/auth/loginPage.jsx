@@ -50,14 +50,15 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await axios.post("/api/user/verify-otp", {
-        email: otpEmail,
-        otp,
-      });
-      // Save user data in Redux and localStorage
-      localStorage.setItem("id", response.data.user.id);
-      localStorage.setItem("token", response.data.user.token);
-      localStorage.setItem("role", response.data.user.role);
+      const response = await axios.post(
+        "/api/user/verify-otp",
+        { email: otpEmail, otp },
+        {
+          withCredentials: true,
+        }
+      );
+      // Cookies are automatically set by the server
+      // Just refresh the page to update the context
       window.location.reload();
     } catch (error) {
       toast.error(error.response?.data.message || "OTP verification failed!");

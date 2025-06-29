@@ -9,6 +9,7 @@ const messageRoutes = require("./router/messageRoutes");
 const notificationRoutes = require("./router/notificationRoutes");
 const adminRoutes = require("./router/adminRoutes");
 const { applySecurityMiddlewares } = require("./middleware/security");
+const cookieParser = require("cookie-parser");
 
 connectDB();
 const PORT = process.env.PORT ? process.env.PORT : 5000;
@@ -34,6 +35,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.use(cookieParser());
 
 applySecurityMiddlewares(app);
 

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import io from "socket.io-client";
@@ -7,45 +8,63 @@ const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const userId = localStorage.getItem("id");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch("/api/notifications", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      const response = await axios.get("/api/notifications", {
+        withCredentials: true,
       });
-      const data = await res.json();
-      setNotifications(data);
-      setUnreadCount(data.filter((n) => !n.isRead).length);
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter((n) => !n.isRead).length);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      // Silently handle auth errors - user is not logged in
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
     }
   };
 
   const markAllAsRead = async () => {
     try {
-      await fetch("/api/notifications/mark-read", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.put(
+        "/api/notifications/mark-read",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error("Error marking notifications as read:", error);
+      // Handle error silently or show toast
+      if (error.response?.status !== 401) {
+        toast.error("Failed to mark notifications as read");
+      }
     }
   };
 
   useEffect(() => {
-    if (userId) {
-      fetchNotifications();
+    // Check if user is authenticated by trying to fetch notifications
+    const checkAuthAndFetch = async () => {
+      try {
+        await fetchNotifications();
+        setIsAuthenticated(true);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    };
 
-      // Socket connection
+    checkAuthAndFetch();
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Socket connection only when authenticated
       const socket = io("http://localhost:4000", {
-        query: { userId },
+        withCredentials: true,
       });
 
       // Listen for new notifications
@@ -67,11 +86,17 @@ export const NotificationProvider = ({ children }) => {
         socket.disconnect();
       };
     }
-  }, [notifications]);
+  }, [isAuthenticated]);
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, fetchNotifications, markAllAsRead }}
+      value={{
+        notifications,
+        unreadCount,
+        fetchNotifications,
+        markAllAsRead,
+        isAuthenticated,
+      }}
     >
       {children}
     </NotificationContext.Provider>

@@ -16,6 +16,36 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Get current user info from cookies
+const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Logout endpoint to clear cookies
+const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.clearCookie("userId");
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 // Sign-Up
 const signUp = async (req, res) => {
   try {
@@ -107,38 +137,56 @@ const signIn = async (req, res) => {
       existingUser.twoFactorOTPExpires = otpExpiry;
       await existingUser.save();
 
-      // Send OTP via email
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
+      try {
+        // Send OTP via email
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Your ReviveReads OTP Code",
-        html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
-      });
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "Your ReviveReads OTP Code",
+          html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
+        });
 
-      return res.status(200).json({
-        message: "OTP sent to your email. Please verify to continue.",
-        user: {
-          id: existingUser._id,
-          role: existingUser.role,
-          email: existingUser.email,
-        },
-        twoFactorRequired: true,
-      });
+        return res.status(200).json({
+          message: "OTP sent to your email. Please verify to continue.",
+          user: {
+            id: existingUser._id,
+            role: existingUser.role,
+            email: existingUser.email,
+          },
+          twoFactorRequired: true,
+        });
+      } catch (emailError) {
+        console.error("Email sending error:", emailError);
+
+        // Clear OTP if email fails
+        existingUser.twoFactorOTP = undefined;
+        existingUser.twoFactorOTPExpires = undefined;
+        await existingUser.save();
+
+        return res.status(500).json({
+          message:
+            "Failed to send OTP email. Please try again or contact support.",
+          error: "Email service unavailable",
+        });
+      }
     } else {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error", details: error });
+    console.error("SignIn error:", error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 };
 
@@ -146,24 +194,45 @@ const signIn = async (req, res) => {
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
+
     const user = await User.findOne({ email });
-    if (!user || !user.twoFactorOTP || !user.twoFactorOTPExpires) {
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.twoFactorOTP || !user.twoFactorOTPExpires) {
       return res
         .status(400)
         .json({ message: "OTP not found. Please login again." });
     }
+
     if (user.twoFactorOTP !== otp) {
+      console.log(
+        `Invalid OTP attempt for user ${email}. Expected: ${user.twoFactorOTP}, Received: ${otp}`
+      );
       return res.status(400).json({ message: "Invalid OTP." });
     }
+
     if (user.twoFactorOTPExpires < Date.now()) {
+      // Clear expired OTP
+      user.twoFactorOTP = undefined;
+      user.twoFactorOTPExpires = undefined;
+      await user.save();
+
       return res
         .status(400)
         .json({ message: "OTP expired. Please login again." });
     }
+
     // OTP is valid, clear OTP fields and issue JWT
     user.twoFactorOTP = undefined;
     user.twoFactorOTPExpires = undefined;
     await user.save();
+
     const token = jwt.sign(
       {
         id: user._id,
@@ -173,16 +242,35 @@ const verifyOTP = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "3d" }
     );
+
+    // Set JWT as httpOnly cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: "strict",
+      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
+    });
+
+    // Set user ID as httpOnly cookie
+    res.cookie("userId", user._id.toString(), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
+    });
+
     return res.status(200).json({
       message: "Login successful",
       user: {
         id: user._id,
         role: user.role,
-        token,
       },
     });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error", details: error });
+    console.error("VerifyOTP error:", error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 };
 
@@ -462,4 +550,6 @@ module.exports = {
   getFavouriteBook,
   getUsersForSidebar,
   updateUserStatus,
+  getCurrentUser,
+  logout,
 };

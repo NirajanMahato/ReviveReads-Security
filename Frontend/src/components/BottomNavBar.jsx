@@ -59,17 +59,15 @@ const BottomNavBar = () => {
   // Fetch unread messages
   const fetchUnreadMessages = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
       const response = await axios.get("/api/messages/unread", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
       setHasUnreadMessages(response.data.unreadCount > 0);
     } catch (error) {
-      console.error("Error fetching unread messages:", error);
+      // Silently handle auth errors
+      if (error.response?.status !== 401) {
+        console.error("Error fetching unread messages:", error);
+      }
     }
   };
 
@@ -82,11 +80,10 @@ const BottomNavBar = () => {
 
   // Socket connection for real-time updates
   useEffect(() => {
-    const userId = localStorage.getItem("id");
-    if (!userId || !isAuthenticated) return;
+    if (!isAuthenticated) return;
 
     const socket = io("http://localhost:4000", {
-      query: { userId },
+      withCredentials: true,
       transports: ["websocket"],
       reconnection: true,
     });

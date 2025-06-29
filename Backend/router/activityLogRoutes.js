@@ -10,10 +10,7 @@ const {
 } = require("../controller/activityLogController");
 const { verifyAdmin } = require("../middleware/authMiddleware");
 
-// All routes require admin privileges
 router.use(verifyAdmin);
-
-// Get all activity logs with filtering and pagination
 router.get("/", getActivityLogs);
 router.get("/user/:userId", getUserActivityLogs);
 router.get("/stats", getActivityStats);

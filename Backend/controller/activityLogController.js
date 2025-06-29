@@ -1,5 +1,4 @@
 const ActivityLog = require("../models/ActivityLog");
-const User = require("../models/User");
 
 // Get activity logs with filtering and pagination
 const getActivityLogs = async (req, res) => {
@@ -20,7 +19,6 @@ const getActivityLogs = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
-    // Build filter object
     const filter = {};
 
     if (userId) filter.userId = userId;
@@ -31,18 +29,15 @@ const getActivityLogs = async (req, res) => {
     if (severity) filter.severity = severity;
     if (ipAddress) filter.ipAddress = { $regex: ipAddress, $options: "i" };
 
-    // Date range filter
     if (startDate || endDate) {
       filter.createdAt = {};
       if (startDate) filter.createdAt.$gte = new Date(startDate);
       if (endDate) filter.createdAt.$lte = new Date(endDate);
     }
 
-    // Build sort object
     const sort = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
-    // Execute query with pagination
     const skip = (page - 1) * limit;
 
     const [logs, total] = await Promise.all([
@@ -119,22 +114,18 @@ const getActivityStats = async (req, res) => {
       if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
     }
 
-    // Get total activities
     const totalActivities = await ActivityLog.countDocuments(dateFilter);
 
-    // Get activities by status
     const statusStats = await ActivityLog.aggregate([
       { $match: dateFilter },
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
 
-    // Get activities by severity
     const severityStats = await ActivityLog.aggregate([
       { $match: dateFilter },
       { $group: { _id: "$severity", count: { $sum: 1 } } },
     ]);
 
-    // Get top actions
     const topActions = await ActivityLog.aggregate([
       { $match: dateFilter },
       { $group: { _id: "$action", count: { $sum: 1 } } },
@@ -142,7 +133,6 @@ const getActivityStats = async (req, res) => {
       { $limit: 10 },
     ]);
 
-    // Get top users by activity
     const topUsers = await ActivityLog.aggregate([
       { $match: dateFilter },
       { $group: { _id: "$userEmail", count: { $sum: 1 } } },
@@ -150,7 +140,6 @@ const getActivityStats = async (req, res) => {
       { $limit: 10 },
     ]);
 
-    // Get activities by hour (last 24 hours)
     const hourlyStats = await ActivityLog.aggregate([
       {
         $match: {
@@ -166,7 +155,6 @@ const getActivityStats = async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    // Get security events count
     const securityEvents = await ActivityLog.countDocuments({
       ...dateFilter,
       severity: { $in: ["high", "critical"] },
@@ -225,7 +213,6 @@ const exportActivityLogs = async (req, res) => {
       .lean();
 
     if (format === "csv") {
-      // Convert to CSV format
       const csvHeaders = [
         "Timestamp",
         "User Email",

@@ -34,13 +34,11 @@ const postBook = async (req, res) => {
   try {
     const userId = req.user.id;
     const { title, genre, description, price, condition, delivery } = req.body;
-    // Handle multiple images
     if (!req.files || req.files.length === 0) {
       return res
         .status(400)
         .json({ success: false, message: "At least one image is required!" });
     }
-    // Handle multiple images
     const images = req.files.map((file) => file.filename); // Store the original file names
     const book = new Book({
       seller: userId,
@@ -54,9 +52,8 @@ const postBook = async (req, res) => {
     });
     const data = await book.save();
 
-    // Add the book ID to the user's book_listings array
     await User.findByIdAndUpdate(userId, {
-      $push: { book_listings: data._id }, // Push the book ID into the user's book_listings array
+      $push: { book_listings: data._id },
     });
     res.status(200).json({ message: "Book posted successfully", data });
   } catch (error) {
@@ -70,7 +67,6 @@ const updateBookApprovalStatus = async (req, res) => {
     const { bookId } = req.params;
     const { status } = req.body;
 
-    // Populate the seller field
     const book = await Book.findById(bookId).populate("seller");
 
     if (!book) {
@@ -81,17 +77,15 @@ const updateBookApprovalStatus = async (req, res) => {
     book.approvalDate = new Date();
     await book.save();
 
-    // Create notification with the correct seller ID
     const message = `Your book "${
       book.title
     }" has been ${status.toLowerCase()} by the admin.`;
     const notification = await createNotification(
-      book.seller._id.toString(), // Convert ObjectId to string
+      book.seller._id.toString(),
       "BOOK_APPROVAL",
       message
     );
 
-    // Send real-time notification
     const receiverSocketId = getReceiverSocketId(book.seller._id.toString());
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newNotification", {
@@ -161,7 +155,7 @@ const deleteBookById = async (req, res) => {
     }
 
     await User.findByIdAndUpdate(userId, {
-      $pull: { book_listings: bookid }, // Remove the book ID
+      $pull: { book_listings: bookid },
     });
 
     return res.status(200).json({ message: "Book deleted successfully!" });

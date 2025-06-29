@@ -8,6 +8,7 @@ const bookRoutes = require("./router/bookRoutes");
 const messageRoutes = require("./router/messageRoutes");
 const notificationRoutes = require("./router/notificationRoutes");
 const adminRoutes = require("./router/adminRoutes");
+const activityLogRoutes = require("./router/activityLogRoutes");
 const { applySecurityMiddlewares } = require("./middleware/security");
 const cookieParser = require("cookie-parser");
 
@@ -45,6 +46,7 @@ app.use("/api/book", bookRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/activity-logs", activityLogRoutes);
 
 app.use("/api/product_images", express.static("product_images"));
 app.use("/api/uploads/users", express.static("uploads/users"));

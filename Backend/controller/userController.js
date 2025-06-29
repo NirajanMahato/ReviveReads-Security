@@ -5,6 +5,10 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Conversation = require("../models/Conversation");
 const mongoose = require("mongoose");
+const {
+  logUserActivity,
+  logSecurityEvent,
+} = require("../middleware/activityLogger");
 
 //Get all users information
 const getAllUsers = async (req, res) => {
@@ -102,6 +106,12 @@ const signUp = async (req, res) => {
         `,
     });
 
+    // Log successful registration
+    await logUserActivity(req, res, "REGISTER", "auth", {
+      resourceId: newUser._id,
+      details: { registrationMethod: "email" },
+    });
+
     res.status(201).json({ message: "User saved successfully", data, info });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
@@ -125,6 +135,12 @@ const signIn = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
+      // Log failed login attempt
+      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "User not found", email },
+      });
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
@@ -156,6 +172,12 @@ const signIn = async (req, res) => {
           html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
         });
 
+        // Log OTP sent
+        await logUserActivity(req, res, "OTP_SENT", "auth", {
+          resourceId: existingUser._id,
+          details: { email },
+        });
+
         return res.status(200).json({
           message: "OTP sent to your email. Please verify to continue.",
           user: {
@@ -180,6 +202,12 @@ const signIn = async (req, res) => {
         });
       }
     } else {
+      // Log failed login attempt
+      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "Invalid password", email },
+      });
       return res.status(400).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
@@ -200,11 +228,12 @@ const verifyOTP = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (!user.twoFactorOTP || !user.twoFactorOTPExpires) {
+    if (!user || !user.twoFactorOTP || !user.twoFactorOTPExpires) {
+      await logUserActivity(req, res, "OTP_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "OTP not found", email },
+      });
       return res
         .status(400)
         .json({ message: "OTP not found. Please login again." });
@@ -214,6 +243,14 @@ const verifyOTP = async (req, res) => {
       console.log(
         `Invalid OTP attempt for user ${email}. Expected: ${user.twoFactorOTP}, Received: ${otp}`
       );
+
+      // Log failed OTP attempt
+      await logUserActivity(req, res, "OTP_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "Invalid OTP", email },
+      });
+
       return res.status(400).json({ message: "Invalid OTP." });
     }
 
@@ -222,6 +259,12 @@ const verifyOTP = async (req, res) => {
       user.twoFactorOTP = undefined;
       user.twoFactorOTPExpires = undefined;
       await user.save();
+
+      await logUserActivity(req, res, "OTP_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "OTP expired", email },
+      });
 
       return res
         .status(400)
@@ -257,6 +300,12 @@ const verifyOTP = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
+    });
+
+    // Log successful login
+    await logUserActivity(req, res, "LOGIN_SUCCESS", "auth", {
+      resourceId: user._id,
+      details: { loginMethod: "2FA" },
     });
 
     return res.status(200).json({

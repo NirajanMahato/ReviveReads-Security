@@ -1,3 +1,4 @@
 /node_modules
 /uploads
 .env
+ACTIVITY_LOGGING_GUIDE.MD

@@ -6,11 +6,9 @@ const logActivity = (action, resourceType, options = {}) => {
   return async (req, res, next) => {
     const originalSend = res.send;
 
-    // Override res.send to capture response data
     res.send = function (data) {
       res.send = originalSend;
 
-      // Log the activity after response is sent
       logUserActivity(req, res, action, resourceType, {
         ...options,
         responseData: data,
@@ -41,19 +39,16 @@ const logUserActivity = async (
       responseData,
     } = options;
 
-    // Get user information
     const user = req.user || {};
     const userId = user.id || null;
     const userEmail = user.email || req.body?.email || "anonymous";
     const userRole = user.role || "anonymous";
 
-    // Get request information
     const ipAddress =
       req.ip || req.connection.remoteAddress || req.headers["x-forwarded-for"];
     const userAgent = req.get("User-Agent") || "Unknown";
     const deviceFingerprint = req.deviceFingerprint || null;
 
-    // Determine status based on response
     let finalStatus = status;
     if (responseData && typeof responseData === "string") {
       try {
@@ -62,7 +57,6 @@ const logUserActivity = async (
           finalStatus = "failed";
         }
       } catch (e) {
-        // Not JSON, check if it's an error response
         if (res.statusCode >= 400) {
           finalStatus = "failed";
         }
@@ -71,7 +65,6 @@ const logUserActivity = async (
       finalStatus = "failed";
     }
 
-    // Create activity log entry
     const activityLog = new ActivityLog({
       userId,
       userEmail,
@@ -103,7 +96,6 @@ const logUserActivity = async (
 
     await activityLog.save();
 
-    // Log to console for immediate visibility
     const logMessage = `[ACTIVITY] ${action} - User: ${userEmail} (${userRole}) - IP: ${ipAddress} - Status: ${finalStatus}`;
 
     if (
@@ -118,7 +110,6 @@ const logUserActivity = async (
       logger.info(logMessage, { activityLog: activityLog._id });
     }
   } catch (error) {
-    // Don't let logging errors affect the main application
     logger.error("Error logging activity:", error);
   }
 };
@@ -181,7 +172,6 @@ const logAllRequests = (req, res, next) => {
     const userEmail = user.email || "anonymous";
     const ipAddress = req.ip || req.connection.remoteAddress;
 
-    // Log basic request info
     logger.info(
       `[REQUEST] ${req.method} ${req.originalUrl} - User: ${userEmail} - IP: ${ipAddress} - Status: ${res.statusCode} - Duration: ${duration}ms`
     );
@@ -192,7 +182,6 @@ const logAllRequests = (req, res, next) => {
 
 // Utility functions for specific actions
 const activityLogger = {
-  // Authentication actions
   logLoginAttempt: (req, res, next) =>
     logActivity("LOGIN_ATTEMPT", "auth")(req, res, next),
   logLoginSuccess: (req, res, next) =>
@@ -216,7 +205,6 @@ const activityLogger = {
       next
     ),
 
-  // User profile actions
   logProfileUpdate: (req, res, next) =>
     logActivity("PROFILE_UPDATE", "user")(req, res, next),
   logAvatarUpload: (req, res, next) =>
@@ -224,7 +212,6 @@ const activityLogger = {
   logProfileView: (req, res, next) =>
     logActivity("PROFILE_VIEW", "user")(req, res, next),
 
-  // Book actions
   logBookCreate: (req, res, next) =>
     logActivity("BOOK_CREATE", "book")(req, res, next),
   logBookUpdate: (req, res, next) =>
@@ -244,7 +231,6 @@ const activityLogger = {
   logBookFavoriteRemove: (req, res, next) =>
     logActivity("BOOK_FAVORITE_REMOVE", "book")(req, res, next),
 
-  // Messaging actions
   logMessageSend: (req, res, next) =>
     logActivity("MESSAGE_SEND", "message")(req, res, next),
   logMessageRead: (req, res, next) =>
@@ -254,13 +240,11 @@ const activityLogger = {
   logConversationView: (req, res, next) =>
     logActivity("CONVERSATION_VIEW", "message")(req, res, next),
 
-  // Admin actions
   logUserDelete: (req, res, next) =>
     logActivity("USER_DELETE", "user", { severity: "high" })(req, res, next),
   logUserStatusUpdate: (req, res, next) =>
     logActivity("USER_STATUS_UPDATE", "user")(req, res, next),
 
-  // File upload actions
   logFileUploadAttempt: (req, res, next) =>
     logActivity("FILE_UPLOAD_ATTEMPT", "system")(req, res, next),
   logFileUploadSuccess: (req, res, next) =>
@@ -271,7 +255,6 @@ const activityLogger = {
       severity: "medium",
     })(req, res, next),
 
-  // Utility functions
   logActivity,
   logUserActivity,
   logSecurityEvent,

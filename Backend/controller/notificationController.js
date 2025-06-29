@@ -38,7 +38,6 @@ const createNotification = async (userId, type, message) => {
     
     await notification.save();
     
-    // Emit the notification using socket
     emitNotification(userId, notification);
     
     return notification;

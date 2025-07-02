@@ -65,7 +65,6 @@ const HeroSection = ({ scrollToRecommendSection }) => {
           </div>
         </div>
       </div>
-      {/* Modal component */}
       <AddBookModal showModal={showModal} closeModal={closeModal} />
     </>
   );

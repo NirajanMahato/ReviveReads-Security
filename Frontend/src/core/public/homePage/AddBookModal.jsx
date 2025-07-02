@@ -15,7 +15,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
     images: [],
   });
 
-  // Populate form data when editing
   useEffect(() => {
     if (editBook) {
       setFormData({
@@ -55,7 +54,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
     }));
   };
 
-  // Reference for the file input
   const fileInputRef = useRef(null);
   const handleButtonClick = () => {
     fileInputRef.current.click();
@@ -65,14 +63,12 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
     e.preventDefault();
     const form = new FormData();
 
-    // Append all form fields
-    Object.keys(formData).forEach(key => {
-      if (key !== 'images') {
+    Object.keys(formData).forEach((key) => {
+      if (key !== "images") {
         form.append(key, formData[key]);
       }
     });
 
-    // Append images
     formData.images.forEach((image) => {
       form.append("images", image);
     });
@@ -84,7 +80,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
     try {
       let response;
       if (editBook) {
-        // Update existing book
         response = await axios.patch(
           `/api/book/update-book/${editBook._id}`,
           form,
@@ -92,12 +87,10 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
         );
         toast.success("Book updated successfully");
       } else {
-        // Create new book
         response = await axios.post("/api/book/post-book", form, { headers });
         toast.success("Book posted successfully");
       }
 
-      // Reset form and close modal
       setFormData({
         title: "",
         genre: "",
@@ -156,7 +149,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
               required
             />
           </div>
-
           <div className="mt-3">
             <label
               htmlFor="description"
@@ -173,7 +165,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
               required
             />
           </div>
-
           <div className="mt-2 flex justify-between md:gap-4 gap-3">
             <div className="w-full">
               <label htmlFor="genre" className="block text-sm font-semibold">
@@ -220,7 +211,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
               </select>
             </div>
           </div>
-
           <div className="mt-2 flex justify-between items-end md:gap-6 gap-4">
             <div className="w-full">
               <label htmlFor="price" className="block text-sm font-semibold">
@@ -261,14 +251,12 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
               Yes
             </div>
           </div>
-
           <div className="mt-3">
             <label htmlFor="images" className="block text-sm font-semibold">
               Upload Images
             </label>
 
             <div className="flex md:gap-4 gap-2 mt-2">
-              {/* Display selected images */}
               <div className="flex flex-wrap gap-2 mb-2">
                 {formData.images.map((image, index) => (
                   <div
@@ -280,7 +268,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
                       alt="preview"
                       className="md:w-32 md:h-28 w-16 h-16 object-cover rounded-md"
                     />
-                    {/* Remove button for each image */}
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
@@ -291,8 +278,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
                   </div>
                 ))}
               </div>
-
-              {/* Input to add more images */}
               <input
                 type="file"
                 name="images"
@@ -317,7 +302,6 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
               )}
             </div>
           </div>
-
           <button
             type="submit"
             className="mt-4 w-full bg-gray-800 text-white py-2 rounded-md hover:bg-black transition duration-300"

@@ -27,7 +27,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - **express-rate-limit** (Rate limiting)
 - **morgan** (HTTP request logging)
 - **winston** (Advanced logging)
-
+- **Modular security middleware** (All security logic in `middleware/security.js`)
 
 ### Frontend
 
@@ -143,6 +143,19 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 ### 16. **Environment Variable Validation**
 
 - The app will not start if any required environment variable is missing, preventing insecure or misconfigured deployments.
+
+### 17. **Account Lockout After Multiple Failed Logins**
+
+- After 5 failed login attempts, the user account is locked for 15 minutes.
+- Prevents brute-force attacks by making repeated login attempts ineffective.
+- User is notified of lockout status and remaining lockout time.
+
+---
+
+## Advanced Security Features
+
+- Account Lockout After Multiple Failed Logins
+- (You can add more advanced features such as CAPTCHA, audit logging, email notifications for security events, etc.)
 
 ---
 

@@ -29,6 +29,9 @@ const userSchema = mongoose.Schema(
     resetPasswordExpires: Date,
     twoFactorOTP: String,
     twoFactorOTPExpires: Date,
+    // Account lockout fields
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockoutUntil: { type: Date },
   },
   { timestamps: true }
 );

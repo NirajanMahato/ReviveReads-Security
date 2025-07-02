@@ -131,16 +131,24 @@ const signIn = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
-        status: "failed",
-        severity: "medium",
-        details: { reason: "User not found", email },
-      });
       return res.status(400).json({ message: "Invalid Credentials" });
+    }
+
+    // Check for account lockout
+    if (existingUser.lockoutUntil && existingUser.lockoutUntil > Date.now()) {
+      const minutes = Math.ceil(
+        (existingUser.lockoutUntil - Date.now()) / 60000
+      );
+      return res.status(403).json({
+        message: `Account locked due to multiple failed login attempts. Try again in ${minutes} minute(s).`,
+      });
     }
 
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (isMatch) {
+      // Reset failed login attempts and lockout
+      existingUser.failedLoginAttempts = 0;
+      existingUser.lockoutUntil = undefined;
       // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
@@ -148,64 +156,52 @@ const signIn = async (req, res) => {
       existingUser.twoFactorOTPExpires = otpExpiry;
       await existingUser.save();
 
-      try {
-        const transporter = nodemailer.createTransport({
-          host: "smtp.gmail.com",
-          port: 587,
-          secure: false,
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        });
+      // Send OTP via email
+      const transporter = nodemailer.createTransporter({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
 
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: "Your ReviveReads OTP Code",
-          html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
-        });
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Your ReviveReads OTP Code",
+        html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
+      });
 
-        await logUserActivity(req, res, "OTP_SENT", "auth", {
-          resourceId: existingUser._id,
-          details: { email },
-        });
-
-        return res.status(200).json({
-          message: "OTP sent to your email. Please verify to continue.",
-          user: {
-            id: existingUser._id,
-            role: existingUser.role,
-            email: existingUser.email,
-          },
-          twoFactorRequired: true,
-        });
-      } catch (emailError) {
-        console.error("Email sending error:", emailError);
-
-        existingUser.twoFactorOTP = undefined;
-        existingUser.twoFactorOTPExpires = undefined;
-        await existingUser.save();
-
-        return res.status(500).json({
+      return res.status(200).json({
+        message: "OTP sent to your email. Please verify to continue.",
+        user: {
+          id: existingUser._id,
+          role: existingUser.role,
+          email: existingUser.email,
+        },
+        twoFactorRequired: true,
+      });
+    } else {
+      // Increment failed login attempts
+      existingUser.failedLoginAttempts =
+        (existingUser.failedLoginAttempts || 0) + 1;
+      // Lock account after 5 failed attempts for 15 minutes
+      if (existingUser.failedLoginAttempts >= 5) {
+        existingUser.lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+      }
+      await existingUser.save();
+      if (existingUser.lockoutUntil && existingUser.lockoutUntil > Date.now()) {
+        return res.status(403).json({
           message:
-            "Failed to send OTP email. Please try again or contact support.",
-          error: "Email service unavailable",
+            "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
         });
       }
-    } else {
-      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
-        status: "failed",
-        severity: "medium",
-        details: { reason: "Invalid password", email },
-      });
       return res.status(400).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
-    console.error("SignIn error:", error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+    res.status(500).json({ error: "Internal Server Error", details: error });
   }
 };
 

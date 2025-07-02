@@ -158,18 +158,4 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 ---
 
-## Advanced Security Features
-
-- Account Lockout After Multiple Failed Logins
-- Audit Logging of Sensitive Actions
-- (You can add more advanced features such as CAPTCHA, email notifications for security events, etc.)
-
----
-
-## Author
-
-- Nirajan Mahato
-
----
-
 **This project demonstrates secure web development practices for my college's security assignment.**

@@ -163,6 +163,12 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
   - Password change
 - Helps users detect suspicious activity and respond quickly to potential threats.
 
+### 20. **Logout from All Devices (Session Invalidation)**
+
+- Users can log out from all devices/sessions with a single action.
+- All existing JWTs are invalidated by incrementing a session version in the database.
+- Prevents session hijacking and allows users to secure their account if a device is lost or compromised.
+
 ---
 
 ## Advanced Security Features
@@ -170,6 +176,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Account Lockout After Multiple Failed Logins
 - Audit Logging of Sensitive Actions
 - Email Notifications for Security Events
+- Logout from All Devices (Session Invalidation)
 
 ---
 

@@ -18,6 +18,7 @@ const {
   verifyOTP,
   getCurrentUser,
   logout,
+  logoutAll,
 } = require("../controller/userController");
 const { authenticateToken } = require("../middleware/userAuth");
 const { uploadUserAvatar } = require("../config/multerConfig");
@@ -48,5 +49,6 @@ router.post("/verify-otp", authLimiter, verifyOTP);
 
 router.get("/me", authenticateToken, getCurrentUser);
 router.post("/logout", logout);
+router.post("/logout-all", authenticateToken, logoutAll);
 
 module.exports = router;

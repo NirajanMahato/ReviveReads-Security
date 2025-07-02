@@ -293,6 +293,7 @@ const verifyOTP = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
+        sessionVersion: user.sessionVersion || 0,
       },
       process.env.JWT_SECRET,
       { expiresIn: "3d" }
@@ -621,6 +622,20 @@ const logAuditEvent = async (req, userId, action, resource, details = {}) => {
   }
 };
 
+// Add logoutAll endpoint
+const logoutAll = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    await User.findByIdAndUpdate(userId, { $inc: { sessionVersion: 1 } });
+    res.clearCookie("token");
+    res.clearCookie("userId");
+    res.status(200).json({ message: "Logged out from all devices" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getAllUsers,
   signUp,
@@ -639,4 +654,5 @@ module.exports = {
   updateUserStatus,
   getCurrentUser,
   logout,
+  logoutAll,
 };

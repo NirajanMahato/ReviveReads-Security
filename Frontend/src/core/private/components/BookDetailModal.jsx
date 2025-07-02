@@ -11,7 +11,6 @@ const BookDetailsModal = ({ isOpen, onClose, book, onApprove, onDecline }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg w-full sm:w-96 md:w-[600px] lg:w-[650px] p-6">
-        {/* Modal Header */}
         <div className="flex justify-between">
           <div>
             <h1 className="text-xl font-semibold text-gray-800">
@@ -46,7 +45,6 @@ const BookDetailsModal = ({ isOpen, onClose, book, onApprove, onDecline }) => {
           </button>
         </div>
 
-        {/* Book Details */}
         <div className="mt-6">
           <div className="">
             <span className="grid grid-cols-4 gap-6 mt-2">
@@ -60,7 +58,6 @@ const BookDetailsModal = ({ isOpen, onClose, book, onApprove, onDecline }) => {
               ))}
             </span>
           </div>
-          {/* Seller Info */}
           <div className="border-t border-b border-gray-200 py-3 my-3 mt-6">
             <div className="flex items-center space-x-3">
               <div
@@ -111,7 +108,6 @@ const BookDetailsModal = ({ isOpen, onClose, book, onApprove, onDecline }) => {
             />
           </div>
 
-          {/* Action Buttons */}
           <div className="w-1/3 flex justify-between mt-6 gap-4">
             <button
               onClick={() => onApprove(book._id, "Approved")}

@@ -54,11 +54,11 @@ const Dashboard = () => {
 
   // Format data for the User Activity graph
   const userActivityGraphData = {
-    labels: userActivityData.map((item) => `Week ${item._id}`), // X-axis: Weeks
+    labels: userActivityData.map((item) => `Week ${item._id}`),
     datasets: [
       {
         label: "Active Users",
-        data: userActivityData.map((item) => item.count), // Y-axis: Counts
+        data: userActivityData.map((item) => item.count),
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -100,7 +100,7 @@ const Dashboard = () => {
       value: summary.newBooksCount,
       label: "New Books Added",
       bgColor: "bg-green-100",
-      icon: <FaBook />, // You can use any relevant icon here
+      icon: <FaBook />,
       iconBgColor: "bg-green-500",
       link: "/admin/booklistings",
     },
@@ -162,7 +162,7 @@ const Dashboard = () => {
       cell: (info) => {
         const lastActivity = info.getValue();
         return lastActivity
-          ? format(new Date(lastActivity), "dd MMM yyyy, hh:mm a") // Example format: "14 Jan 2025, 03:30 PM"
+          ? format(new Date(lastActivity), "dd MMM yyyy, hh:mm a")
           : "N/A";
       },
     }),
@@ -183,7 +183,6 @@ const Dashboard = () => {
                   <div
                     className={`relative px-3 py-4 flex items-center gap-3 rounded-lg shadow cursor-pointer hover:shadow-lg ${card.bgColor}`}
                   >
-                    {/* Dot Indicator */}
                     {card.showDot && (
                       <span className="absolute top-2 right-2 w-2 h-2 bg-orange-600 rounded-full"></span>
                     )}
@@ -207,7 +206,6 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            {/* Book Listings Over Time */}
             <div className="bg-white px-6 py-4 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4">
                 Book Listings Over Time
@@ -215,7 +213,6 @@ const Dashboard = () => {
               <Bar data={bookListingsGraphData} />
             </div>
 
-            {/* User Activity */}
             <div className="bg-white px-6 py-4 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4">User Activity</h2>
               <Line data={userActivityGraphData} />

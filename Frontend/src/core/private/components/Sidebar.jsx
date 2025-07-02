@@ -60,7 +60,6 @@ export default function Sidebar({ expanded, onToggle }) {
           </button>
         </div>
 
-        {/* Sidebar Items */}
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex-1 px-2 text-sm">
             {sidebarItems.map((item) => (
@@ -75,7 +74,6 @@ export default function Sidebar({ expanded, onToggle }) {
           </ul>
         </SidebarContext.Provider>
 
-        {/* Profile Section */}
         <div className="border-t flex p-3 items-center cursor-pointer hover:bg-gray-100 dropdown dropdown-hover dropdown-top dropdown-content">
           <img
             src={
@@ -122,7 +120,6 @@ export default function Sidebar({ expanded, onToggle }) {
   );
 }
 
-// SidebarItem Component with Routing
 function SidebarItem({ icon, text, path, iconClassName }) {
   const { expanded } = useContext(SidebarContext);
 
@@ -138,7 +135,6 @@ function SidebarItem({ icon, text, path, iconClassName }) {
         }`
       }
     >
-      {/* Apply iconClassName dynamically */}
       <span className={`text-2xl ${iconClassName}`}>{icon}</span>
       <span
         className={`overflow-hidden transition-all duration-300 ${
@@ -148,7 +144,6 @@ function SidebarItem({ icon, text, path, iconClassName }) {
         {text}
       </span>
 
-      {/* Tooltip for collapsed state */}
       {!expanded && (
         <div
           className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-indigo-100 text-indigo-800 text-sm

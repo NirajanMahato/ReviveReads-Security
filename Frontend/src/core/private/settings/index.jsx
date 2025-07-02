@@ -12,7 +12,7 @@ const Settings = () => {
   };
 
   const closeEditProfile = () => {
-    setIsEditing(false); // Close the edit view
+    setIsEditing(false);
   };
   return (
     <div className="px-4 py-1.5 bg-gray-100 min-h-screen">

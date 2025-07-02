@@ -8,15 +8,13 @@ import Pagination from "../../../shared/Pagination/Pagination";
 const UsersPage = () => {
   const { users, loading } = useFetchUsers();
 
-   // Pagination state
-   const [currentPage, setCurrentPage] = useState(1);
-   const usersPerPage = 8; // Number of users per page
- 
-   // Calculate pagination indexes
-   const totalPages = Math.ceil(users.length / usersPerPage);
-   const indexOfLastUser = currentPage * usersPerPage;
-   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 8; // Number of users per page
+
+  const totalPages = Math.ceil(users.length / usersPerPage);
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
   const handleCopy = (id) => {
     navigator.clipboard.writeText(id).then(() => {
@@ -24,11 +22,9 @@ const UsersPage = () => {
     });
   };
 
-  // Column definitions
   const columnHelper = createColumnHelper();
 
   const columns = [
-    // ID column with copy functionality
     columnHelper.accessor("_id", {
       header: "ID",
       cell: (info) => (
@@ -40,15 +36,14 @@ const UsersPage = () => {
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
           }}
-          title={info.getValue()} // Tooltip for full ID
-          onClick={() => handleCopy(info.getValue())} // Copy to clipboard
+          title={info.getValue()}
+          onClick={() => handleCopy(info.getValue())}
         >
           {info.getValue()}
         </div>
       ),
     }),
 
-    // Name column with avatar
     columnHelper.accessor("name", {
       header: "Name",
       cell: (info) => {
@@ -69,25 +64,21 @@ const UsersPage = () => {
       },
     }),
 
-    // Phone column
     columnHelper.accessor("phone", {
       header: "Phone",
       cell: (info) => info.getValue() || "N/A",
     }),
 
-    // Listings count
     columnHelper.accessor("book_listings", {
       header: "Listings",
       cell: (info) => info.getValue().length,
     }),
 
-    // Role
     columnHelper.accessor("role", {
       header: "Role",
       cell: (info) => info.getValue(),
     }),
 
-    // Status
     columnHelper.accessor("status", {
       header: "Status",
       cell: (info) => {
@@ -108,7 +99,6 @@ const UsersPage = () => {
       },
     }),
 
-    // Created At column
     columnHelper.accessor("createdAt", {
       header: "Created At",
       cell: (info) => new Date(info.getValue()).toLocaleDateString() || "N/A",

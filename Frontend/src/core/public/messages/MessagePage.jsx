@@ -9,7 +9,6 @@ const MessagePage = () => {
 
   return (
     <div className="w-full h-screen flex justify-between overflow-hidden relative">
-      {/* Sidebar - hidden on mobile when conversation is selected */}
       <div
         className={`${
           selectedConversation ? "hidden sm:block" : "block"
@@ -18,7 +17,6 @@ const MessagePage = () => {
         <MessageSidebar />
       </div>
 
-      {/* Message Container - full width on mobile when selected */}
       <div
         className={`${
           !selectedConversation ? "hidden sm:block" : "block"

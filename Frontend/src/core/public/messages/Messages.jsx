@@ -15,14 +15,12 @@ const Messages = () => {
     }, 100);
   }, [messages]);
 
-  // Helper function to format date
   const formatDate = (date) => {
     const messageDate = new Date(date);
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
 
-    // Check if the message was sent today, yesterday, or earlier
     if (
       messageDate.getDate() === today.getDate() &&
       messageDate.getMonth() === today.getMonth() &&
@@ -44,7 +42,6 @@ const Messages = () => {
     }
   };
 
-  // Group messages by date
   let groupedMessages = [];
   let currentDate = null;
 
@@ -63,7 +60,6 @@ const Messages = () => {
         groupedMessages.length > 0 &&
         groupedMessages.map((group, groupIndex) => (
           <div key={groupIndex}>
-            {/* Display the date once for the group of messages */}
             <div className="flex justify-center text-xs text-gray-500 py-2">
               <h1 className="bg-gray-200 px-1.5 py-0.5 rounded-md">
                 {group.date}

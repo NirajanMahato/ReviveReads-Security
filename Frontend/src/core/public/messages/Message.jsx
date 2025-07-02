@@ -14,14 +14,13 @@ const Message = ({ message }) => {
   const textColor = fromMe ? "text-gray-100" : "text-gray-900";
   const shakeClass = message.shouldShake ? "shake" : "";
 
-  // Extract hours and minutes
   const messageCreatedAt = new Date(message.createdAt);
   let hours = messageCreatedAt.getHours();
   const minutes = messageCreatedAt.getMinutes();
-  const period = hours >= 12 ? "PM" : "AM"; // Determine AM or PM
+  const period = hours >= 12 ? "PM" : "AM";
   hours = hours % 12; // Convert to 12-hour format
   hours = hours ? hours : 12; // 0 becomes 12 for 12 AM/PM
-  const formattedMinutes = minutes.toString().padStart(2, "0"); // Format minutes
+  const formattedMinutes = minutes.toString().padStart(2, "0");
   const formattedTime = `${hours}:${formattedMinutes} ${period}`; // Format as "hh:mm AM/PM"
 
   return (

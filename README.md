@@ -40,6 +40,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - **Tailwind CSS** (Styling)
 - **Playwright** (End-to-end testing)
 - **React Hot Toast** (Notifications)
+- **DOMPurify** (Strict input sanitization)
 
 ---
 
@@ -155,24 +156,29 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Prevents brute-force attacks by making repeated login attempts ineffective.
 - User is notified of lockout status and remaining lockout time.
 
-### 18. **Audit Logging of Sensitive Actions**
+### 19. **Audit Logging of Sensitive Actions**
 
 - All sensitive actions (login, logout, profile update, failed login) are logged to a dedicated audit log collection in the database.
 - Each log entry includes user ID, action, resource, IP address, user agent, and timestamp.
 - Supports auditing, troubleshooting, and security reviews.
 
-### 19. **Email Notifications for Security Events**
+### 20. **Email Notifications for Security Events**
 
 - Users receive email notifications for important security events:
   - Account lockout after multiple failed login attempts
   - Password change
 - Helps users detect suspicious activity and respond quickly to potential threats.
 
-### 20. **Logout from All Devices (Session Invalidation)**
+### 21. **Logout from All Devices (Session Invalidation)**
 
 - Users can log out from all devices/sessions with a single action.
 - All existing JWTs are invalidated by incrementing a session version in the database.
 - Prevents session hijacking and allows users to secure their account if a device is lost or compromised.
+
+### 22. **Strict Input Sanitization with DOMPurify (Frontend)**
+
+- All user-generated HTML content rendered in the frontend is sanitized using DOMPurify.
+- Prevents XSS attacks by ensuring only safe HTML is rendered.
 
 ---
 
@@ -182,6 +188,8 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Audit Logging of Sensitive Actions
 - Email Notifications for Security Events
 - Logout from All Devices (Session Invalidation)
+- HTTP Strict Transport Security (HSTS)
+- Strict Input Sanitization with DOMPurify (Frontend)
 
 ---
 

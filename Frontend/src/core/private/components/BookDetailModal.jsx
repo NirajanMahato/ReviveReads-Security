@@ -1,4 +1,5 @@
 import React from "react";
+import { sanitizeHtml } from "../../../utils/sanitizeHtml";
 
 const BookDetailsModal = ({ isOpen, onClose, book, onApprove, onDecline }) => {
   if (!isOpen || !book) return null; // Don't render if modal is not open or book is not selected
@@ -93,18 +94,21 @@ const BookDetailsModal = ({ isOpen, onClose, book, onApprove, onDecline }) => {
             </p>
             <p className="text-sm text-gray-600">
               <strong>Delivery:</strong>{" "}
-              {book?.delivery
-                ? "Available"
-                : "No delivery available"}
+              {book?.delivery ? "Available" : "No delivery available"}
             </p>
           </div>
           <div className="mt-1">
             <h4 className="text-sm font-gilroySemiBold text-gray-600">
               Description:
             </h4>
-            <p className="text-sm mt-1 text-gray-600  rounded-md p-1.5 border">
-              {book.description || "No description provided."}
-            </p>
+            <p
+              className="text-sm mt-1 text-gray-600  rounded-md p-1.5 border"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(
+                  book.description || "No description provided."
+                ),
+              }}
+            />
           </div>
 
           {/* Action Buttons */}

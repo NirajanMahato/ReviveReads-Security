@@ -26,7 +26,6 @@ const SaveListsCard = () => {
     fetchSavedBooks();
   }, []);
 
-  // Remove saved book
   const handleRemoveSavedBook = async (bookId) => {
     try {
       const response = await axios.delete(
@@ -71,8 +70,8 @@ const SaveListsCard = () => {
                 className="md:text-xs text-[10px] text-gray-600 mt-1"
                 style={{ lineHeight: "1" }}
               >
-                {product.description.length > 50 // Adjust '50' for desired length
-                  ? `${product?.description.substring(0, 50)}...` // Truncate text
+                {product.description.length > 50
+                  ? `${product?.description.substring(0, 50)}...`
                   : product?.description}
               </h1>
             </div>
@@ -91,7 +90,7 @@ const SaveListsCard = () => {
                     ? "bg-green-200"
                     : product.condition === "Acceptable"
                     ? "bg-purple-200"
-                    : "bg-gray-200 bg-opacity-80" // Default for other conditions
+                    : "bg-gray-200 bg-opacity-80"
                 }`}
               >
                 {product?.condition}

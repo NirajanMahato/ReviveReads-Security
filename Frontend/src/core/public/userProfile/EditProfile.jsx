@@ -20,15 +20,11 @@ const EditProfile = ({ onClose }) => {
       : "/api/uploads/users/default_avatar.png"
   );
 
-  // Create a reference for the file input
   const fileInputRef = useRef(null);
 
-  // Phone number validation function
   const isValidNepaliPhone = (phone) => {
-    // Remove any non-digit characters
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // Check if it starts with valid Nepali prefixes and has 10 digits
     const validPrefixes = [
       "984",
       "985",
@@ -47,12 +43,10 @@ const EditProfile = ({ onClose }) => {
     );
   };
 
-  // Update the handleChange function in EditProfile component
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "phone") {
-      // Only allow digits and limit to 10 characters
       const cleanValue = value.replace(/\D/g, "").slice(0, 10);
       setValues((prev) => ({ ...prev, phone: cleanValue }));
     } else {
@@ -60,7 +54,6 @@ const EditProfile = ({ onClose }) => {
     }
   };
 
-  // Handle image upload and create a preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -69,22 +62,18 @@ const EditProfile = ({ onClose }) => {
     }
   };
 
-  // Handle button click to trigger file input
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
 
-  // Access token and user ID from localStorage
   const headers = {
     id: localStorage.getItem("id"),
     authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate phone number if provided
     if (values.phone && !isValidNepaliPhone(values.phone)) {
       toast.error("Please enter a valid Nepali phone number");
       return;
@@ -129,13 +118,13 @@ const EditProfile = ({ onClose }) => {
           <input
             type="file"
             accept="image/*"
-            ref={fileInputRef} // Attach the ref to the file input
+            ref={fileInputRef}
             onChange={handleImageChange}
             className="hidden"
           />
           <button
             type="button"
-            onClick={handleButtonClick} // Trigger file input click
+            onClick={handleButtonClick}
             className="absolute bottom-1 right-1 w-5 h-5 flex items-center justify-center bg-gray-700 text-white p-1 rounded-full"
           >
             <span className="text-sm">+</span>

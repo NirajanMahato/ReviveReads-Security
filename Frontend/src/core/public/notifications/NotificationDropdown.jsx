@@ -41,7 +41,6 @@ const NotificationDropdown = () => {
       onMouseLeave={handleMouseLeave}
       onClick={handleButtonClick}
     >
-      {/* Notification Bell */}
       <button className="relative flex items-center justify-center">
         <IoNotificationsOutline className="text-2xl text-gray-600 hover:text-black" />
         {userInfo && unreadCount > 0 && (
@@ -51,7 +50,6 @@ const NotificationDropdown = () => {
         )}
       </button>
 
-      {/* Dropdown */}
       {isHovered && userInfo && (
         <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 shadow-lg rounded-lg z-50 transition-opacity duration-200">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">

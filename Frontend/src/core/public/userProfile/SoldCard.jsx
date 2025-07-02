@@ -7,7 +7,6 @@ const SoldCard = () => {
   const [soldBooks, setSoldBooks] = useState([]);
   const authenticateToken = localStorage.getItem("token");
 
-  // Fetch sold books from the backend
   const fetchSoldBooks = async () => {
     if (!authenticateToken) {
       toast.error("Please log in to view sold books.");

@@ -51,7 +51,6 @@ const ProductDetails = () => {
     <>
       <Navbar />
       <div className="flex lg:flex-row flex-col lg:items-start md:items-center md:px-8 px-5 lg:mt-3 md:mt-3 pb-6">
-        {/* Product Image Section */}
         <div className="lg:w-1/3 md:w-1/2">
           <div className="flex justify-center rounded-lg pt-4 md:pb-8 pb-4">
             <img
@@ -76,8 +75,6 @@ const ProductDetails = () => {
             ))}
           </div>
         </div>
-
-        {/* Product Details Section */}
         <div className="lg:w-2/3 w-full lg:pl-8 lg:pr-2 lg:mt-0 mt-6">
           <h1 className="lg:text-3xl md:text-2xl text-xl font-ppMori text-gray-900">
             {product?.title}
@@ -85,15 +82,13 @@ const ProductDetails = () => {
           <h1 className="md:text-xl font-gilroyMedium text-gray-500 mt-1 pl-1">
             रू. {product?.price}
           </h1>
-
-          {/* Seller Info */}
           <div className="border-t border-b border-gray-200 py-3 my-3">
             <div className="flex items-center space-x-4">
               <div
                 className="cursor-pointer"
                 onClick={() =>
                   navigate(`/customerprofile/${product?.seller._id}`)
-                } // Redirect with user ID
+                }
               >
                 <img
                   className="h-12 w-12 rounded-full object-cover shadow"

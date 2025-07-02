@@ -32,7 +32,6 @@ const NotificationsPage = () => {
         )}
       </div>
 
-      {/* Conditionally render notifications or a no notifications message */}
       {notifications.length === 0 ? (
         <p className="text-center text-gray-500">No notifications</p>
       ) : (

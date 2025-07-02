@@ -40,7 +40,6 @@ function App() {
   useUpdateUserStatus();
 
   useEffect(() => {
-    // The UserContext will handle authentication state from cookies
     setLoading(false);
   }, []);
 

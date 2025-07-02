@@ -12,7 +12,7 @@ import AddBookModal from "../homePage/AddBookModal";
 import notAvailable from "/BG/notAvailable.svg";
 
 const AdPostsCard = ({ userId }) => {
-  const [filteredProducts, setFilteredProducts] = useState([]); // Filtered products
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // Search input state
   const { allBooks, loading, fetchBooks } = useUserBooks(userId);
 
@@ -20,7 +20,6 @@ const AdPostsCard = ({ userId }) => {
     setFilteredProducts(allBooks);
   }, [allBooks]);
 
-  // Delete Book Function
   const deleteBook = async (bookId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this book?"
@@ -39,7 +38,7 @@ const AdPostsCard = ({ userId }) => {
       const updatedProducts = allBooks.filter(
         (product) => product._id !== bookId
       );
-      setFilteredProducts(updatedProducts); // Update filtered results
+      setFilteredProducts(updatedProducts);
     } catch (error) {
       console.log(error);
       toast.error(error.response?.data?.message || "Something went wrong");
@@ -74,13 +73,12 @@ const AdPostsCard = ({ userId }) => {
     const filtered = allBooks.filter((product) =>
       product.title.toLowerCase().includes(query)
     );
-    setFilteredProducts(filtered); // Update filtered results
+    setFilteredProducts(filtered);
   };
 
   const [showModal, setShowModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
 
-  // Function to handle edit click
   const handleEditClick = (book) => {
     setSelectedBook(book);
     setShowModal(true);
@@ -92,19 +90,18 @@ const AdPostsCard = ({ userId }) => {
 
   const closeModal = async () => {
     setShowModal(false);
-    setSelectedBook(null); // Reset selected book
-    await fetchBooks(); // Refresh the books data
+    setSelectedBook(null);
+    await fetchBooks();
     setFilteredProducts(allBooks);
   };
 
   return (
     <div className="font-gilroy">
-      {/* Search Bar */}
       <div className="md:w-10/12 w-11/12 py-2 border-solid border rounded-lg border-gray-500 mt-6 flex items-center justify-between p-4">
         <input
           type="text"
           value={searchQuery}
-          onChange={handleSearch} // Search functionality
+          onChange={handleSearch}
           placeholder="Search Books"
           className="w-full focus:outline-none"
         />
@@ -113,7 +110,6 @@ const AdPostsCard = ({ userId }) => {
         </span>
       </div>
 
-      {/* Product Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 md:gap-y-8 gap-y-5 mt-6">
         {loading ? (
           <div>Loading...</div>

@@ -6,20 +6,16 @@ const adminSummary = async (req, res) => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    // Count new users within the last 7 days
     const newUsersCount = await User.countDocuments({
       createdAt: { $gte: oneWeekAgo },
     });
 
-    // Count new books within the last 7 days
     const newBooksCount = await Book.countDocuments({
       createdAt: { $gte: oneWeekAgo },
     });
 
-    // Count total books listed
     const totalBooksCount = await Book.countDocuments();
 
-    // Count total books listed
     const booksPending = await Book.countDocuments({ status: "Pending" });
 
     res.status(200).json({
@@ -58,11 +54,11 @@ const bookListingsStats = async (req, res) => {
     const stats = await Book.aggregate([
       {
         $group: {
-          _id: { $week: "$createdAt" }, // Group by week
+          _id: { $week: "$createdAt" },
           count: { $sum: 1 },
         },
       },
-      { $sort: { _id: 1 } }, // Sort by week
+      { $sort: { _id: 1 } },
     ]);
 
     res.status(200).json(stats);

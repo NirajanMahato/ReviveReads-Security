@@ -5,10 +5,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Conversation = require("../models/Conversation");
 const mongoose = require("mongoose");
-const {
-  logUserActivity,
-  logSecurityEvent,
-} = require("../middleware/activityLogger");
+const { logUserActivity } = require("../middleware/activityLogger");
 const AuditLog = require("../models/AuditLog");
 
 //Get all users information
@@ -136,12 +133,10 @@ const signIn = async (req, res) => {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
-    // Check for account lockout
     if (existingUser.lockoutUntil && existingUser.lockoutUntil > Date.now()) {
       const minutes = Math.ceil(
         (existingUser.lockoutUntil - Date.now()) / 60000
       );
-      // Send lockout email notification
       try {
         const transporter = nodemailer.createTransport({
           host: "smtp.gmail.com",
@@ -158,9 +153,7 @@ const signIn = async (req, res) => {
           subject: "Account Locked - ReviveReads",
           html: `<h2>Your account has been locked due to multiple failed login attempts.</h2><p>Please try again after 15 minutes. If this wasn't you, please contact support immediately.</p>`,
         });
-      } catch (err) {
-        /* ignore email errors */
-      }
+      } catch (err) {}
       return res.status(403).json({
         message: `Account locked due to multiple failed login attempts. Try again in 15 minutes.`,
       });
@@ -168,17 +161,14 @@ const signIn = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (isMatch) {
-      // Reset failed login attempts and lockout
       existingUser.failedLoginAttempts = 0;
       existingUser.lockoutUntil = undefined;
-      // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
       existingUser.twoFactorOTP = otp;
       existingUser.twoFactorOTPExpires = otpExpiry;
       await existingUser.save();
 
-      // Send OTP via email
       const transporter = nodemailer.createTransporter({
         host: "smtp.gmail.com",
         port: 587,
@@ -208,7 +198,6 @@ const signIn = async (req, res) => {
         twoFactorRequired: true,
       });
     } else {
-      // Increment failed login attempts
       existingUser.failedLoginAttempts =
         (existingUser.failedLoginAttempts || 0) + 1;
       // Lock account after 5 failed attempts for 15 minutes
@@ -283,7 +272,6 @@ const verifyOTP = async (req, res) => {
         .json({ message: "OTP expired. Please login again." });
     }
 
-    // OTP is valid, clear OTP fields and issue JWT
     user.twoFactorOTP = undefined;
     user.twoFactorOTPExpires = undefined;
     await user.save();
@@ -398,7 +386,6 @@ const forgotPassword = async (req, res) => {
       expiresIn: "15m",
     });
 
-    // Save reset token to user
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
@@ -461,13 +448,11 @@ const resetPassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password and clear reset token
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    // Send password change email notification
     try {
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -484,9 +469,7 @@ const resetPassword = async (req, res) => {
         subject: "Password Changed - ReviveReads",
         html: `<h2>Your password has been changed successfully.</h2><p>If you did not perform this action, please reset your password immediately or contact support.</p>`,
       });
-    } catch (err) {
-      /* ignore email errors */
-    }
+    } catch (err) {}
 
     res.status(200).json({
       success: true,

@@ -5,7 +5,6 @@ const express = require("express");
 const morgan = require("morgan");
 const winston = require("winston");
 
-// Winston logger setup
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -18,7 +17,6 @@ const logger = winston.createLogger({
   ],
 });
 
-// Morgan middleware to log HTTP requests using winston
 const morganMiddleware = morgan("combined", {
   stream: {
     write: (message) => logger.info(message.trim()),
@@ -32,7 +30,6 @@ const authLimiter = rateLimit({
   message: "Too many attempts, please try again later.",
 });
 
-// Function to apply all global security middlewares
 function applySecurityMiddlewares(app) {
   app.use(morganMiddleware);
 

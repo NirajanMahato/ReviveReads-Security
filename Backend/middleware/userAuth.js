@@ -15,7 +15,6 @@ const authenticateToken = async (req, res, next) => {
         .status(403)
         .json({ message: "Token expired. Please sign-in again" });
     }
-    // Check sessionVersion
     if (userId) {
       const dbUser = await User.findById(userId);
       if (!dbUser || user.sessionVersion !== (dbUser.sessionVersion || 0)) {

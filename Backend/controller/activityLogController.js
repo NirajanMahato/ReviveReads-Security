@@ -1,6 +1,5 @@
 const ActivityLog = require("../models/ActivityLog");
 
-// Get activity logs with filtering and pagination
 const getActivityLogs = async (req, res) => {
   try {
     const {
@@ -67,7 +66,6 @@ const getActivityLogs = async (req, res) => {
   }
 };
 
-// Get activity logs for a specific user
 const getUserActivityLogs = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -102,7 +100,6 @@ const getUserActivityLogs = async (req, res) => {
   }
 };
 
-// Get activity statistics
 const getActivityStats = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -175,7 +172,6 @@ const getActivityStats = async (req, res) => {
   }
 };
 
-// Get recent security events
 const getSecurityEvents = async (req, res) => {
   try {
     const { limit = 20 } = req.query;
@@ -195,7 +191,6 @@ const getSecurityEvents = async (req, res) => {
   }
 };
 
-// Export activity logs
 const exportActivityLogs = async (req, res) => {
   try {
     const { startDate, endDate, format = "json" } = req.query;
@@ -261,7 +256,6 @@ const exportActivityLogs = async (req, res) => {
   }
 };
 
-// Clean old activity logs (admin only)
 const cleanOldLogs = async (req, res) => {
   try {
     const { days = 365 } = req.query;

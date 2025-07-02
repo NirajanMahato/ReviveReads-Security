@@ -141,8 +141,28 @@ const signIn = async (req, res) => {
       const minutes = Math.ceil(
         (existingUser.lockoutUntil - Date.now()) / 60000
       );
+      // Send lockout email notification
+      try {
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: existingUser.email,
+          subject: "Account Locked - ReviveReads",
+          html: `<h2>Your account has been locked due to multiple failed login attempts.</h2><p>Please try again after 15 minutes. If this wasn't you, please contact support immediately.</p>`,
+        });
+      } catch (err) {
+        /* ignore email errors */
+      }
       return res.status(403).json({
-        message: `Account locked due to multiple failed login attempts. Try again in ${minutes} minute(s).`,
+        message: `Account locked due to multiple failed login attempts. Try again in 15 minutes.`,
       });
     }
 
@@ -445,6 +465,27 @@ const resetPassword = async (req, res) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
+
+    // Send password change email notification
+    try {
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.email,
+        subject: "Password Changed - ReviveReads",
+        html: `<h2>Your password has been changed successfully.</h2><p>If you did not perform this action, please reset your password immediately or contact support.</p>`,
+      });
+    } catch (err) {
+      /* ignore email errors */
+    }
 
     res.status(200).json({
       success: true,

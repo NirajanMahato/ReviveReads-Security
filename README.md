@@ -156,6 +156,27 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Each log entry includes user ID, action, resource, IP address, user agent, and timestamp.
 - Supports auditing, troubleshooting, and security reviews.
 
+### 19. **Email Notifications for Security Events**
+
+- Users receive email notifications for important security events:
+  - Account lockout after multiple failed login attempts
+  - Password change
+- Helps users detect suspicious activity and respond quickly to potential threats.
+
+---
+
+## Advanced Security Features
+
+- Account Lockout After Multiple Failed Logins
+- Audit Logging of Sensitive Actions
+- Email Notifications for Security Events
+
+---
+
+## Authors
+
+- Nirajan Mahato
+
 ---
 
 **This project demonstrates secure web development practices for my college's security assignment.**

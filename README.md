@@ -136,15 +136,20 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 - `helmet` is used to set headers for clickjacking, MIME sniffing, and other common web vulnerabilities.
 
-### 15. **HTTP Request Logging**
+### 15. **HTTP Strict Transport Security (HSTS)**
+
+- The backend sets the Strict-Transport-Security header (HSTS) in production.
+- Forces browsers to use HTTPS for all requests, preventing protocol downgrade and cookie hijacking attacks.
+
+### 16. **HTTP Request Logging**
 
 - All HTTP requests are logged using `morgan` and stored with `winston` in `logs/combined.log` and `logs/error.log`.
 
-### 16. **Environment Variable Validation**
+### 17. **Environment Variable Validation**
 
 - The app will not start if any required environment variable is missing, preventing insecure or misconfigured deployments.
 
-### 17. **Account Lockout After Multiple Failed Logins**
+### 18. **Account Lockout After Multiple Failed Logins**
 
 - After 5 failed login attempts, the user account is locked for 15 minutes.
 - Prevents brute-force attacks by making repeated login attempts ineffective.

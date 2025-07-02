@@ -43,6 +43,15 @@ function applySecurityMiddlewares(app) {
       xssFilter: true,
     })
   );
+  if (process.env.NODE_ENV === "production") {
+    app.use(
+      helmet.hsts({
+        maxAge: 31536000, // 1 year in seconds
+        includeSubDomains: true,
+        preload: true,
+      })
+    );
+  }
   app.use(
     helmet.contentSecurityPolicy({
       directives: {

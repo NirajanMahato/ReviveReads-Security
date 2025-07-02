@@ -150,12 +150,19 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Prevents brute-force attacks by making repeated login attempts ineffective.
 - User is notified of lockout status and remaining lockout time.
 
+### 18. **Audit Logging of Sensitive Actions**
+
+- All sensitive actions (login, logout, profile update, failed login) are logged to a dedicated audit log collection in the database.
+- Each log entry includes user ID, action, resource, IP address, user agent, and timestamp.
+- Supports auditing, troubleshooting, and security reviews.
+
 ---
 
 ## Advanced Security Features
 
 - Account Lockout After Multiple Failed Logins
-- (You can add more advanced features such as CAPTCHA, audit logging, email notifications for security events, etc.)
+- Audit Logging of Sensitive Actions
+- (You can add more advanced features such as CAPTCHA, email notifications for security events, etc.)
 
 ---
 

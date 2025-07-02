@@ -9,6 +9,7 @@ const {
   logUserActivity,
   logSecurityEvent,
 } = require("../middleware/activityLogger");
+const AuditLog = require("../models/AuditLog");
 
 //Get all users information
 const getAllUsers = async (req, res) => {
@@ -42,6 +43,7 @@ const getCurrentUser = async (req, res) => {
 // Logout endpoint to clear cookies
 const logout = async (req, res) => {
   try {
+    await logAuditEvent(req, req.userId, "LOGOUT", "auth", {});
     res.clearCookie("token");
     res.clearCookie("userId");
     res.status(200).json({ message: "Logged out successfully" });
@@ -174,6 +176,8 @@ const signIn = async (req, res) => {
         html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
       });
 
+      await logAuditEvent(req, existingUser._id, "LOGIN_SUCCESS", "auth", {});
+
       return res.status(200).json({
         message: "OTP sent to your email. Please verify to continue.",
         user: {
@@ -198,6 +202,9 @@ const signIn = async (req, res) => {
             "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
         });
       }
+      await logAuditEvent(req, existingUser._id, "LOGIN_FAILED", "auth", {
+        email,
+      });
       return res.status(400).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
@@ -331,7 +338,7 @@ const updateData = async (req, res) => {
     if (req.file) updateFields.avatar = req.file.filename;
 
     const data = await User.findByIdAndUpdate(id, updateFields, { new: true }); // { new: true }: Returns the updated document.
-
+    await logAuditEvent(req, id, "PROFILE_UPDATE", "user", updateFields);
     res.status(200).json({ message: "User updated successfully", data });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -554,6 +561,22 @@ const updateUserStatus = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// Helper to log audit events
+const logAuditEvent = async (req, userId, action, resource, details = {}) => {
+  try {
+    await AuditLog.create({
+      userId,
+      action,
+      resource,
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"],
+      details,
+    });
+  } catch (err) {
+    // Do not block main flow on logging error
   }
 };
 

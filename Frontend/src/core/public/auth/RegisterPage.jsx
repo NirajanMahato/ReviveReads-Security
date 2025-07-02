@@ -35,6 +35,7 @@ const RegisterPage = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const { registerUser, loading } = useRegister();
+
   const submit = async (data) => {
     await registerUser(data);
   };

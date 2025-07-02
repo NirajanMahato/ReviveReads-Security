@@ -1,23 +1,25 @@
-import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { IoMdLock } from "react-icons/io";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import axios from "axios";
-import logo2 from "/Logos/Logo2.png";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { IoMdLock } from "react-icons/io";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import * as yup from "yup";
 import loadingGif from "/BG/buttonLoading.gif";
+import logo2 from "/Logos/Logo2.png";
 
-const schema = yup.object({
-  newPassword: yup
-    .string()
-    .required("Password is required")
-    .min(6, "Password must be at least 6 characters"),
-  confirmPassword: yup
-    .string()
-    .required("Please confirm your password")
-    .oneOf([yup.ref("newPassword")], "Passwords must match"),
-}).required();
+const schema = yup
+  .object({
+    newPassword: yup
+      .string()
+      .required("Password is required")
+      .min(6, "Password must be at least 6 characters"),
+    confirmPassword: yup
+      .string()
+      .required("Please confirm your password")
+      .oneOf([yup.ref("newPassword")], "Passwords must match"),
+  })
+  .required();
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -60,9 +62,12 @@ const ResetPassword = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen px-4">
         <div className="max-w-md w-full text-center">
-          <h2 className="text-2xl font-bold mb-4">Password Reset Successful!</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Password Reset Successful!
+          </h2>
           <p className="text-gray-600 mb-4">
-            Your password has been successfully reset. You will be redirected to the login page shortly.
+            Your password has been successfully reset. You will be redirected to
+            the login page shortly.
           </p>
           <Link
             to="/login"
@@ -91,11 +96,8 @@ const ResetPassword = () => {
           </p>
 
           {error && (
-            <div className="mb-4 text-red-500 text-center text-sm">
-              {error}
-            </div>
+            <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
           )}
-
           <div className="w-full h-12 border rounded-3xl border-gray-300 mb-4 flex items-center pl-4 pr-2">
             <IoMdLock className="text-xl text-gray-500 mr-2" />
             <input
@@ -106,9 +108,10 @@ const ResetPassword = () => {
             />
           </div>
           {errors.newPassword && (
-            <p className="text-red-500 text-xs mb-4">{errors.newPassword.message}</p>
+            <p className="text-red-500 text-xs mb-4">
+              {errors.newPassword.message}
+            </p>
           )}
-
           <div className="w-full h-12 border rounded-3xl border-gray-300 mb-4 flex items-center pl-4 pr-2">
             <IoMdLock className="text-xl text-gray-500 mr-2" />
             <input
@@ -119,9 +122,10 @@ const ResetPassword = () => {
             />
           </div>
           {errors.confirmPassword && (
-            <p className="text-red-500 text-xs mb-4">{errors.confirmPassword.message}</p>
+            <p className="text-red-500 text-xs mb-4">
+              {errors.confirmPassword.message}
+            </p>
           )}
-
           <button
             type="submit"
             className="w-full rounded-3xl h-12 bg-black text-white text-lg font-normal transition duration-200 ease-in-out hover:bg-[#403a4f] hover:font-semibold flex justify-center items-center"
@@ -132,7 +136,6 @@ const ResetPassword = () => {
               "Reset Password"
             )}
           </button>
-
           <div className="text-center mt-4">
             <Link
               to="/login"

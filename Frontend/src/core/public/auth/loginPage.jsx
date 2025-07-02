@@ -58,7 +58,6 @@ const LoginPage = () => {
         }
       );
       // Cookies are automatically set by the server
-      // Just refresh the page to update the context
       window.location.reload();
     } catch (error) {
       toast.error(error.response?.data.message || "OTP verification failed!");

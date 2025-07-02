@@ -5,7 +5,7 @@ import { IoMdLock } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 import { Link } from "react-router-dom";
 import * as yup from "yup";
-import useRegister from "../../../hooks/useRegister"; // Import the custom hook
+import useRegister from "../../../hooks/useRegister";
 import loadingGif from "/BG/buttonLoading.gif";
 import wallpaper from "/BG/wallpaper.jpg";
 import logo2 from "/Logos/Logo2.png";
@@ -56,12 +56,10 @@ const RegisterPage = () => {
               Welcome to ReviveReads
             </h1>
             <h3>Please enter your details.</h3>
-
             <form
               onSubmit={handleSubmit(submit)}
               className="w-full flex flex-col items-center"
             >
-              {/* Full Name Input */}
               <div className="md:w-6/12 w-11/12 h-12 border-solid border rounded-3xl border-gray-300 mt-14 flex items-center pl-4 pr-2">
                 <BsFillPersonFill
                   style={{
@@ -82,8 +80,6 @@ const RegisterPage = () => {
                   {errors.name?.message}
                 </h6>
               )}
-
-              {/* Email Input */}
               <div className="md:w-6/12 w-11/12 h-12 border-solid border rounded-3xl border-gray-300 mt-4 flex items-center pl-4 pr-2">
                 <MdEmail
                   style={{
@@ -104,8 +100,6 @@ const RegisterPage = () => {
                   {errors.email?.message}
                 </h6>
               )}
-
-              {/* Password Input */}
               <div className="md:w-6/12 w-11/12 h-12 border-solid border rounded-3xl border-gray-300 mt-4 flex items-center pl-4 pr-2">
                 <IoMdLock
                   style={{
@@ -126,7 +120,6 @@ const RegisterPage = () => {
                   {errors.password?.message}
                 </h6>
               )}
-
               <button
                 type="submit"
                 className="mt-8 md:w-6/12 w-11/12 flex justify-center items-center rounded-3xl h-12 bg-black text-white text-lg font-normal transition duration-200 ease-in-out hover:bg-[#403a4f] hover:font-semibold"
@@ -142,8 +135,6 @@ const RegisterPage = () => {
                 )}
               </button>
             </form>
-
-            {/* Redirect to Login */}
             <div className="md:w-6/12 w-11/12 flex justify-center pt-3 pr-1">
               <h3 className="text-gray-500">Already have an account?</h3>
               <Link to="/Login">
@@ -154,8 +145,6 @@ const RegisterPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Background Image */}
         <div
           className="lg:w-6/12 relative bg-cover bg-center"
           style={{ backgroundImage: `url(${wallpaper})`, borderRadius: "15%" }}

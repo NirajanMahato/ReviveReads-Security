@@ -18,15 +18,12 @@ const useLogin = () => {
       });
 
       if (response.data.twoFactorRequired) {
-        // 2FA required, return info for OTP step
         return { twoFactorRequired: true, user: response.data.user };
       }
 
-      // For non-2FA login (if implemented), update Redux state
       dispatch(authActions.login());
       dispatch(authActions.changeRole(response.data.user.role));
 
-      // Refresh user info in context
       refreshUserInfo();
 
       toast.success("Login successful!");

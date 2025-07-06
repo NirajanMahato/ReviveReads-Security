@@ -168,8 +168,9 @@ const signIn = async (req, res) => {
       existingUser.twoFactorOTP = otp;
       existingUser.twoFactorOTPExpires = otpExpiry;
       await existingUser.save();
+      console.log("here", otp);
 
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
         secure: false,

@@ -23,7 +23,14 @@ const schema = yup
     password: yup
       .string()
       .required("Password is required")
-      .min(6, "Password must be at least 6 characters"),
+      .min(8, "Password must be at least 8 characters")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .matches(
+        /[!@#$%^&*(),.?":{}|<>]/,
+        'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)'
+      ),
   })
   .required();
 
@@ -120,6 +127,17 @@ const RegisterPage = () => {
                   {errors.password?.message}
                 </h6>
               )}
+              <div className="md:w-6/12 w-11/12 mt-2">
+                <p className="text-xs text-gray-600">
+                  Password must contain at least 8 characters, including:
+                </p>
+                <ul className="text-xs text-gray-500 ml-4 mt-1">
+                  <li>• One uppercase letter (A-Z)</li>
+                  <li>• One lowercase letter (a-z)</li>
+                  <li>• One number (0-9)</li>
+                  <li>• One special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                </ul>
+              </div>
               <button
                 type="submit"
                 className="mt-8 md:w-6/12 w-11/12 flex justify-center items-center rounded-3xl h-12 bg-black text-white text-lg font-normal transition duration-200 ease-in-out hover:bg-[#403a4f] hover:font-semibold"

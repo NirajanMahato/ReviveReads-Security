@@ -13,7 +13,14 @@ const schema = yup
     newPassword: yup
       .string()
       .required("Password is required")
-      .min(6, "Password must be at least 6 characters"),
+      .min(8, "Password must be at least 8 characters")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .matches(
+        /[!@#$%^&*(),.?":{}|<>]/,
+        'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)'
+      ),
     confirmPassword: yup
       .string()
       .required("Please confirm your password")
@@ -112,6 +119,17 @@ const ResetPassword = () => {
               {errors.newPassword.message}
             </p>
           )}
+          <div className="mb-4">
+            <p className="text-xs text-gray-600">
+              Password must contain at least 8 characters, including:
+            </p>
+            <ul className="text-xs text-gray-500 ml-4 mt-1">
+              <li>• One uppercase letter (A-Z)</li>
+              <li>• One lowercase letter (a-z)</li>
+              <li>• One number (0-9)</li>
+              <li>• One special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+            </ul>
+          </div>
           <div className="w-full h-12 border rounded-3xl border-gray-300 mb-4 flex items-center pl-4 pr-2">
             <IoMdLock className="text-xl text-gray-500 mr-2" />
             <input

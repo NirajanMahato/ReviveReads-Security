@@ -90,18 +90,22 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Admin and user roles are enforced both in backend and frontend.
 - Admin-only routes are protected by middleware.
 
-### 5. **Input Validation & Sanitization**
+### 5. **Enhanced Input Validation & Sanitization**
 
-- Frontend uses Yup for form validation (registration, login, password reset, etc.).
-- Backend checks for required fields and validates password length.
-- Email and phone number formats are validated.
+- Frontend uses Yup for comprehensive form validation with strong password requirements.
+- Backend implements comprehensive input sanitization using XSS protection.
+- Email and phone number formats are strictly validated.
 - All MongoDB ObjectIds are validated before DB queries to prevent NoSQL injection.
+- Input sanitization middleware applied to all user inputs.
+- Strong password policy: minimum 8 characters with uppercase, lowercase, number, and special character requirements.
 
-### 6. **File Upload Security**
+### 6. **Enhanced File Upload Security**
 
 - Only image files are accepted for uploads (avatars, book images).
-- File size limits are enforced (5MB for book images).
+- Strict MIME type validation prevents file type spoofing.
+- File size limits are enforced (5MB for book images, 5MB for avatars).
 - Uploaded files are renamed with random names to prevent collisions.
+- Rate limiting on file uploads (10 uploads per 15 minutes per IP).
 
 ### 7. **Password Reset Security**
 
@@ -175,10 +179,12 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - All existing JWTs are invalidated by incrementing a session version in the database.
 - Prevents session hijacking and allows users to secure their account if a device is lost or compromised.
 
-### 22. **Strict Input Sanitization with DOMPurify (Frontend)**
+### 22. **Enhanced Input Sanitization with DOMPurify (Frontend)**
 
 - All user-generated HTML content rendered in the frontend is sanitized using DOMPurify.
+- Comprehensive text sanitization for all user inputs.
 - Prevents XSS attacks by ensuring only safe HTML is rendered.
+- Utility functions for sanitizing both HTML and plain text content.
 
 ---
 
@@ -189,7 +195,13 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Email Notifications for Security Events
 - Logout from All Devices (Session Invalidation)
 - HTTP Strict Transport Security (HSTS)
-- Strict Input Sanitization with DOMPurify (Frontend)
+- Enhanced Input Sanitization with DOMPurify (Frontend)
+- Strong Password Policy Enforcement
+- Comprehensive Input Validation & Sanitization
+- Enhanced File Upload Security with Rate Limiting
+- Socket.io Authentication
+- Additional Security Headers (Referrer-Policy, Permissions-Policy, Expect-CT)
+- CORS Protection with X-Requested-With Header
 
 ---
 

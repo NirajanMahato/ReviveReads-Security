@@ -23,18 +23,30 @@ const {
 const { authenticateToken } = require("../middleware/userAuth");
 const { uploadUserAvatar } = require("../config/multerConfig");
 const { authLimiter } = require("../middleware/security");
+const {
+  sanitizeInput,
+  validateEmail,
+  validatePhone,
+  uploadLimiter,
+} = require("../middleware/validation");
 
 router.post("/uploadImage", uploadUserAvatar, uploadImage);
-router.post("/sign-up", signUp);
-router.post("/sign-in", signIn);
+router.post("/sign-up", sanitizeInput, validateEmail, signUp);
+router.post("/sign-in", sanitizeInput, validateEmail, authLimiter, signIn);
 router.get("/get-all-users", authenticateToken, getAllUsers);
 router.get("/get-user-by-id/:id", getUserById);
 router.delete("/:id", deleteById);
 router.get("/get-users-for-sidebar", authenticateToken, getUsersForSidebar);
 router.patch("/:id/status", updateUserStatus);
 
-router.post("/forgot-password", authLimiter, forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post(
+  "/forgot-password",
+  sanitizeInput,
+  validateEmail,
+  authLimiter,
+  forgotPassword
+);
+router.post("/reset-password", sanitizeInput, authLimiter, resetPassword);
 
 router.post("/add-to-favorites", authenticateToken, addBookToFavorites);
 router.delete(
@@ -43,9 +55,21 @@ router.delete(
   removeBookFromFavorites
 );
 router.get("/get-favorites-books", authenticateToken, getFavouriteBook);
-router.patch("/", uploadUserAvatar, authenticateToken, updateData);
+router.patch(
+  "/",
+  uploadLimiter,
+  uploadUserAvatar,
+  authenticateToken,
+  updateData
+);
 
-router.post("/verify-otp", authLimiter, verifyOTP);
+router.post(
+  "/verify-otp",
+  sanitizeInput,
+  validateEmail,
+  authLimiter,
+  verifyOTP
+);
 
 router.get("/me", authenticateToken, getCurrentUser);
 router.post("/logout", logout);

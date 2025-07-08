@@ -59,10 +59,24 @@ const signUp = async (req, res) => {
       return res.status(400).json({ message: "Email already exists " });
     }
 
-    if (password.length <= 5) {
+    // Enhanced password validation
+    if (password.length < 8) {
       return res
         .status(400)
-        .json({ message: "Password length should be greater than 5" });
+        .json({ message: "Password must be at least 8 characters long" });
+    }
+
+    // Check for password complexity
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+      return res.status(400).json({
+        message:
+          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*(),.?":{}|<>)',
+      });
     }
     const hashedPass = await bcrypt.hash(password, 10);
 
@@ -168,7 +182,6 @@ const signIn = async (req, res) => {
       existingUser.twoFactorOTP = otp;
       existingUser.twoFactorOTPExpires = otpExpiry;
       await existingUser.save();
-      console.log("here", otp);
 
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -218,7 +231,7 @@ const signIn = async (req, res) => {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error", details: error });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -244,9 +257,9 @@ const verifyOTP = async (req, res) => {
     }
 
     if (user.twoFactorOTP !== otp) {
-      console.log(
-        `Invalid OTP attempt for user ${email}. Expected: ${user.twoFactorOTP}, Received: ${otp}`
-      );
+      // console.log(
+      //   `Invalid OTP attempt for user ${email}. Expected: ${user.twoFactorOTP}, Received: ${otp}`
+      // );
 
       await logUserActivity(req, res, "OTP_FAILED", "auth", {
         status: "failed",
@@ -315,10 +328,7 @@ const verifyOTP = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("VerifyOTP error:", error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -421,7 +431,6 @@ const forgotPassword = async (req, res) => {
       message: "Password reset link sent to email",
     });
   } catch (error) {
-    console.error("Forgot password error:", error);
     res.status(500).json({
       success: false,
       message: "Error sending reset email",
@@ -432,6 +441,26 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
+
+    // Enhanced password validation for reset
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters long" });
+    }
+
+    // Check for password complexity
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+      return res.status(400).json({
+        message:
+          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*(),.?":{}|<>)',
+      });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({
@@ -477,7 +506,6 @@ const resetPassword = async (req, res) => {
       message: "Password reset successful",
     });
   } catch (error) {
-    console.error("Reset password error:", error);
     res.status(500).json({
       success: false,
       message: "Error resetting password",
@@ -565,8 +593,7 @@ const getUsersForSidebar = async (req, res) => {
 
     res.status(200).json(users); // Send filtered users
   } catch (error) {
-    console.error("Error in getUsersForSidebar: ", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

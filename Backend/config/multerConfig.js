@@ -18,10 +18,7 @@ createUploadsDirectories();
 // Multer file filter
 const fileFilter = (req, file, cb) => {
   // Accept only images
-  if (
-    file.mimetype.startsWith("image/") ||
-    file.mimetype === "application/octet-stream"
-  ) {
+  if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
     cb(new Error("Not an image! Please upload only images."), false);
@@ -57,8 +54,9 @@ const bookStorage = multer.diskStorage({
 // Upload configurations
 const uploadUserAvatar = multer({
   storage: userStorage,
-  // fileFilter: fileFilter,
+  fileFilter: fileFilter,
   limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
     files: 1, // Single file only
   },
 });

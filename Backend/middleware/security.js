@@ -1,6 +1,7 @@
 const helmet = require("helmet");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
+const expectCt = require("expect-ct");
 const express = require("express");
 const morgan = require("morgan");
 const winston = require("winston");
@@ -65,6 +66,11 @@ function applySecurityMiddlewares(app) {
       reportOnly: false,
     })
   );
+
+  // Additional security headers
+  app.use(helmet.referrerPolicy({ policy: "strict-origin-when-cross-origin" }));
+  app.use(helmet.permittedCrossDomainPolicies());
+  app.use(expectCt({ maxAge: 86400, enforce: true }));
   app.use(xss());
   app.use(express.json({ limit: "10mb" }));
 }

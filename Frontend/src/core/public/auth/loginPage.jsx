@@ -25,8 +25,7 @@ const schema = yup
   })
   .required();
 
-const GOOGLE_CLIENT_ID =
-  "832707671849-2424kadof3024255atfeglo2mviapm3k.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const LoginPage = () => {
   const {
@@ -53,8 +52,23 @@ const LoginPage = () => {
           callback: handleGoogleResponse,
         });
         window.google.accounts.id.renderButton(googleBtnRef.current, {
+          type: "standard",
           size: "large",
+          width: "360",
+          theme: "outline",
+          text: "signin_with",
+          locale: "en_US",
         });
+
+        if (googleBtnRef.current) {
+          googleBtnRef.current.style.opacity = 0;
+          googleBtnRef.current.style.position = "absolute";
+          googleBtnRef.current.style.top = 0;
+          googleBtnRef.current.style.left = 0;
+          googleBtnRef.current.style.width = "100%";
+          googleBtnRef.current.style.height = "100%";
+          googleBtnRef.current.style.zIndex = 10;
+        }
       } else if (retryCount < maxRetries) {
         retryCount++;
         setTimeout(renderGoogleButton, 300);
@@ -231,21 +245,34 @@ const LoginPage = () => {
                 {loading ? "Sending OTP..." : "Login"}
               </button>
               {/* Divider */}
-              <div className="md:w-6/12 w-11/12 flex items-center my-6">
+              <div className="md:w-6/12 w-11/12 flex items-center my-4">
                 <div className="flex-1 border-t border-gray-300"></div>
                 <span className="px-4 text-gray-500 text-sm">or</span>
                 <div className="flex-1 border-t border-gray-300"></div>
               </div>
-              <div className="my-4 w-full flex justify-center">
-                <div
-                  ref={googleBtnRef}
+              <div className="w-full flex justify-center relative">
+                {/* Your custom Google button design */}
+                <button
+                  type="button" // Important: This should be type="button" to prevent form submission
                   className={
                     "md:w-6/12 w-11/12 rounded-3xl h-12 bg-white border border-gray-300 text-gray-700 text-lg font-normal transition duration-200 ease-in-out hover:bg-gray-50 hover:border-gray-400 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   }
+                  disabled={loading}
+                  onClick={() => {
+                    // Programmatically click the hidden Google button
+                    if (googleBtnRef.current) {
+                      googleBtnRef.current.click();
+                    }
+                  }}
                 >
                   <FcGoogle className="w-6 h-6 mr-3" />
                   Continue with Google
-                </div>
+                </button>
+                <div
+                  ref={googleBtnRef}
+                  className={"absolute top-0 left-0 w-full h-full"}
+                  style={{ zIndex: 0 }}
+                ></div>
               </div>
               <div
                 className={"md:w-6/12 w-11/12 flex justify-center pt-3 pr-1"}

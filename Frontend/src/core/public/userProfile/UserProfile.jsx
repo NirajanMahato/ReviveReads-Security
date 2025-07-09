@@ -61,7 +61,9 @@ const UserProfile = () => {
               <img
                 src={
                   userInfo?.avatar
-                    ? `/api/uploads/users/${userInfo.avatar}`
+                    ? userInfo.avatar.startsWith("http")
+                      ? userInfo.avatar
+                      : `/api/uploads/users/${userInfo.avatar}`
                     : "/api/uploads/users/default_avatar.png"
                 }
                 alt="user"

@@ -1,11 +1,13 @@
 import axios from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import toast from "react-hot-toast";
+import { UserContext } from "../context/UserContext";
 import useConversation from "../zustand/useConverstaion";
 
 const useSendMessage = () => {
   const [loading, setLoading] = useState(false);
   const { messages, setMessages, selectedConversation } = useConversation();
+  const { userInfo } = useContext(UserContext);
 
   const sendMessage = async (message) => {
     setLoading(true);
@@ -15,7 +17,7 @@ const useSendMessage = () => {
         { message },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${userInfo.token}`,
           },
         }
       );

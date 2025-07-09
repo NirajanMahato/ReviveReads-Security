@@ -1,8 +1,9 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
+import { UserContext } from "../../../context/UserContext";
 
 const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,8 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
     delivery: false,
     images: [],
   });
+
+  const { userInfo } = useContext(UserContext);
 
   useEffect(() => {
     if (editBook) {
@@ -74,7 +77,7 @@ const AddBookModal = ({ showModal, closeModal, editBook = null }) => {
     });
 
     const headers = {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${userInfo.token}`,
     };
 
     try {

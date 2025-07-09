@@ -1,12 +1,13 @@
 import axios from "axios";
 import { formatDistanceToNowStrict } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit } from "react-icons/fa";
 import { LuSearch } from "react-icons/lu";
 import { MdOutlineSell } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { UserContext } from "../../../context/UserContext";
 import useUserBooks from "../../../hooks/useUserBooks";
 import AddBookModal from "../homePage/AddBookModal";
 import notAvailable from "/BG/notAvailable.svg";
@@ -15,6 +16,7 @@ const AdPostsCard = ({ userId }) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // Search input state
   const { allBooks, loading, fetchBooks } = useUserBooks(userId);
+  const { userInfo } = useContext(UserContext);
 
   useEffect(() => {
     setFilteredProducts(allBooks);
@@ -30,7 +32,7 @@ const AdPostsCard = ({ userId }) => {
       const response = await axios.delete("/api/book/delete-book", {
         headers: {
           bookid: bookId,
-          authorization: `Bearer ${localStorage.getItem("token")}`,
+          authorization: `Bearer ${userInfo.token}`,
         },
       });
       toast.success(response.data.message);
@@ -55,7 +57,7 @@ const AdPostsCard = ({ userId }) => {
         `/api/book/mark-as-sold/${bookId}`,
         {},
         {
-          headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { authorization: `Bearer ${userInfo.token}` },
         }
       );
       toast.success("Book marked as sold successfully!");

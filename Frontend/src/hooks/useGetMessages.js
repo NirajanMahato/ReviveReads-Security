@@ -1,11 +1,13 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { UserContext } from "../context/UserContext";
 import useConversation from "../zustand/useConverstaion";
 
 const useGetMessages = () => {
   const [loading, setLoading] = useState(false);
   const { messages, setMessages, selectedConversation } = useConversation();
+  const { userInfo } = useContext(UserContext);
 
   useEffect(() => {
     const getMessages = async () => {
@@ -13,7 +15,7 @@ const useGetMessages = () => {
       try {
         const res = await axios(`/api/messages/${selectedConversation._id}`, {
           headers: {
-            authorization: `Bearer ${localStorage.getItem("token")}`,
+            authorization: `Bearer ${userInfo.token}`,
           },
         });
         const data = await res.data;
@@ -27,7 +29,7 @@ const useGetMessages = () => {
     };
 
     if (selectedConversation?._id) getMessages();
-  }, [selectedConversation?._id, setMessages]);
+  }, [selectedConversation?._id, setMessages, userInfo.token]);
 
   return { messages, loading };
 };

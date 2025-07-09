@@ -1,9 +1,10 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { FaEye } from "react-icons/fa";
 import { LuSearch } from "react-icons/lu";
+import { UserContext } from "../../../context/UserContext";
 import useBooks from "../../../hooks/useBooks";
 import DataTable from "../../../shared/DataTable/DataTable";
 import Pagination from "../../../shared/Pagination/Pagination";
@@ -11,6 +12,7 @@ import BookDetailsModal from "../components/BookDetailModal";
 
 const BookListings = () => {
   const { allBooks, loading, setAllBooks } = useBooks();
+  const { userInfo } = useContext(UserContext);
 
   // State variables for filtering and sorting
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +74,7 @@ const BookListings = () => {
         { status },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${userInfo.token}`,
           },
         }
       );

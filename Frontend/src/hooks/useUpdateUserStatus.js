@@ -1,13 +1,14 @@
-import { useEffect } from "react";
 import axios from "axios";
+import { useContext, useEffect } from "react";
+import { UserContext } from "../context/UserContext";
 
 const useUpdateUserStatus = () => {
+  const { userInfo } = useContext(UserContext);
+  const userId = userInfo?._id; // or userInfo.id depending on backend
+
   useEffect(() => {
     const updateUserStatus = async () => {
-      const userId = localStorage.getItem("id"); // Get user ID from localStorage
-      const token = localStorage.getItem("token"); // Get token for authentication
-
-      if (!userId || !token) return; // Exit if user is not authenticated
+      if (!userId) return; // Exit if user is not authenticated
 
       try {
         await axios.patch(
@@ -18,7 +19,7 @@ const useUpdateUserStatus = () => {
           },
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Pass token for authorization
+              Authorization: `Bearer ${userInfo?.token}`, // Pass token for authorization
             },
           }
         );
@@ -31,9 +32,7 @@ const useUpdateUserStatus = () => {
 
     // Optionally, update status to "Away" or "Offline" on page unload
     const handleUnload = async () => {
-      const userId = localStorage.getItem("id");
-      const token = localStorage.getItem("token");
-      if (!userId || !token) return;
+      if (!userId) return;
 
       try {
         await axios.patch(
@@ -44,7 +43,7 @@ const useUpdateUserStatus = () => {
           },
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${userInfo?.token}`,
             },
           }
         );
@@ -59,7 +58,7 @@ const useUpdateUserStatus = () => {
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
     };
-  }, []);
+  }, [userId, userInfo?.token]);
 };
 
 export default useUpdateUserStatus;

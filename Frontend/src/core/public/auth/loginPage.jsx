@@ -1,13 +1,16 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
+import { FcGoogle } from "react-icons/fc";
 import { IoMdLock } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import * as yup from "yup";
 import useLogin from "../../../hooks/useLogin";
+import { authActions } from "../../../store/auth";
 import loadingGif from "/BG/buttonLoading.gif";
 import wallpaper from "/BG/wallpaper.jpg";
 import logo2 from "/Logos/Logo2.png";
@@ -22,6 +25,9 @@ const schema = yup
   })
   .required();
 
+const GOOGLE_CLIENT_ID =
+  "832707671849-2424kadof3024255atfeglo2mviapm3k.apps.googleusercontent.com";
+
 const LoginPage = () => {
   const {
     register,
@@ -34,6 +40,62 @@ const LoginPage = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useLogin();
+  const googleBtnRef = useRef(null);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 10;
+    const renderGoogleButton = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+        });
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          size: "large",
+        });
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(renderGoogleButton, 300);
+      }
+    };
+    renderGoogleButton();
+    return () => {};
+  }, []);
+
+  const handleGoogleResponse = async (response) => {
+    try {
+      setLoading(true);
+      console.log("Google login response received:", response);
+
+      const res = await axios.post(
+        "/api/user/google-login",
+        { credential: response.credential },
+        { withCredentials: true }
+      );
+
+      console.log("Backend response:", res.data);
+
+      if (res.data.success) {
+        dispatch(authActions.login());
+        dispatch(authActions.changeRole(res.data.user.role));
+
+        console.log("Redux state updated, redirecting...");
+        toast.success("Google login successful!");
+        window.location.href = "/";
+      } else {
+        toast.error("Google login failed!");
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      const errorMessage =
+        error.response?.data?.message || "Google login failed!";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const submit = async (data) => {
     setLoading(true);
@@ -168,6 +230,23 @@ const LoginPage = () => {
                 ) : null}
                 {loading ? "Sending OTP..." : "Login"}
               </button>
+              {/* Divider */}
+              <div className="md:w-6/12 w-11/12 flex items-center my-6">
+                <div className="flex-1 border-t border-gray-300"></div>
+                <span className="px-4 text-gray-500 text-sm">or</span>
+                <div className="flex-1 border-t border-gray-300"></div>
+              </div>
+              <div className="my-4 w-full flex justify-center">
+                <div
+                  ref={googleBtnRef}
+                  className={
+                    "md:w-6/12 w-11/12 rounded-3xl h-12 bg-white border border-gray-300 text-gray-700 text-lg font-normal transition duration-200 ease-in-out hover:bg-gray-50 hover:border-gray-400 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  }
+                >
+                  <FcGoogle className="w-6 h-6 mr-3" />
+                  Continue with Google
+                </div>
+              </div>
               <div
                 className={"md:w-6/12 w-11/12 flex justify-center pt-3 pr-1"}
               >

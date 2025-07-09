@@ -1,5 +1,6 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "../context/UserContext";
 
 const useDashboardSummary = () => {
   const [summary, setSummary] = useState({
@@ -9,14 +10,16 @@ const useDashboardSummary = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { userInfo } = useContext(UserContext);
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
         const { data } = await axios.get("/api/admin/summary", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${userInfo.token}`,
           },
+          withCredentials: true,
         });
         setSummary(data);
         setLoading(false);

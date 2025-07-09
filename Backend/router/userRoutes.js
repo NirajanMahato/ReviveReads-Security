@@ -19,6 +19,7 @@ const {
   getCurrentUser,
   logout,
   logoutAll,
+  googleLogin,
 } = require("../controller/userController");
 const { authenticateToken } = require("../middleware/userAuth");
 const { uploadUserAvatar } = require("../config/multerConfig");
@@ -70,6 +71,8 @@ router.post(
   authLimiter,
   verifyOTP
 );
+
+router.post("/google-login", googleLogin);
 
 router.get("/me", authenticateToken, getCurrentUser);
 router.post("/logout", logout);

@@ -32,6 +32,10 @@ const userSchema = mongoose.Schema(
     failedLoginAttempts: { type: Number, default: 0 },
     lockoutUntil: { type: Date },
     sessionVersion: { type: Number, default: 0 },
+    isGoogleUser: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

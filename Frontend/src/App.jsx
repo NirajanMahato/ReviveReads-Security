@@ -7,7 +7,6 @@ import { ProtectedRoute } from "./components/routes/ProtectedRoute";
 import { PublicRoute } from "./components/routes/PublicRoute";
 import { NotificationProvider } from "./context/NotificationContext";
 import { SocketContextProvider } from "./context/SocketContext";
-import { UserProvider } from "./context/UserContext";
 import useUpdateUserStatus from "./hooks/useUpdateUserStatus";
 
 // Lazy-loaded components (keeping your existing imports)
@@ -49,101 +48,99 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <UserProvider>
-        <SocketContextProvider>
-          <NotificationProvider>
-            <Routes>
-              {/* Public Routes - Accessible to Everyone */}
-              <Route path="/" element={<Home />} />
-              <Route path="/products/:bookId" element={<ProductDetails />} />
-              <Route
-                path="/customerprofile/:userId"
-                element={<CustomerProfile />}
-              />
-              <Route path="/error" element={<ErrorPage />} />
+      <SocketContextProvider>
+        <NotificationProvider>
+          <Routes>
+            {/* Public Routes - Accessible to Everyone */}
+            <Route path="/" element={<Home />} />
+            <Route path="/products/:bookId" element={<ProductDetails />} />
+            <Route
+              path="/customerprofile/:userId"
+              element={<CustomerProfile />}
+            />
+            <Route path="/error" element={<ErrorPage />} />
 
-              {/* Auth Routes - Only accessible if NOT authenticated */}
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <LoginPage />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/signup"
-                element={
-                  <PublicRoute>
-                    <RegisterPage />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/forgot-password"
-                element={
-                  <PublicRoute>
-                    <ForgotPassword />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/reset-password/:token"
-                element={
-                  <PublicRoute>
-                    <ResetPassword />
-                  </PublicRoute>
-                }
-              />
+            {/* Auth Routes - Only accessible if NOT authenticated */}
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <PublicRoute>
+                  <RegisterPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicRoute>
+                  <ForgotPassword />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/reset-password/:token"
+              element={
+                <PublicRoute>
+                  <ResetPassword />
+                </PublicRoute>
+              }
+            />
 
-              {/* Protected Routes - Only accessible if authenticated */}
-              <Route
-                path="/messages"
-                element={
-                  <ProtectedRoute>
-                    <MessagePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <UserProfile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/notifications"
-                element={
-                  <ProtectedRoute>
-                    <NotificationsPage />
-                  </ProtectedRoute>
-                }
-              />
+            {/* Protected Routes - Only accessible if authenticated */}
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
+              }
+            />
 
-              {/* Admin Routes - Only accessible if authenticated and role is admin */}
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <Layout />
-                  </AdminRoute>
-                }
-              >
-                <Route index element={<Navigate to="dashboard" />} />
-                <Route path="dashboard" element={<DashboardIndex />} />
-                <Route path="users" element={<UserIndex />} />
-                <Route path="booklistings" element={<BookListings />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
+            {/* Admin Routes - Only accessible if authenticated and role is admin */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Layout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<Navigate to="dashboard" />} />
+              <Route path="dashboard" element={<DashboardIndex />} />
+              <Route path="users" element={<UserIndex />} />
+              <Route path="booklistings" element={<BookListings />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
 
-              {/* Catch-all Route for 404 Errors */}
-              <Route path="*" element={<ErrorPage />} />
-            </Routes>
-          </NotificationProvider>
-        </SocketContextProvider>
-      </UserProvider>
+            {/* Catch-all Route for 404 Errors */}
+            <Route path="*" element={<ErrorPage />} />
+          </Routes>
+        </NotificationProvider>
+      </SocketContextProvider>
     </Suspense>
   );
 }

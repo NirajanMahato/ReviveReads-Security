@@ -10,7 +10,7 @@ const ChatModal = ({ isOpen, onClose }) => {
   const { selectedConversation } = useConversation();
 
   const { onlineUsers } = useSocketContext();
-  const isOnline = onlineUsers.includes(selectedConversation._id);
+  const isOnline = onlineUsers.includes(selectedConversation?._id);
 
   return (
     <div className="fixed md:bottom-4 bottom-16 md:right-4 right-6 w-80 h-96 bg-white shadow-lg border rounded-lg z-51">
@@ -20,12 +20,12 @@ const ChatModal = ({ isOpen, onClose }) => {
             <div className="w-9 rounded-full">
               <img
                 alt="Tailwind CSS chat bubble component"
-                src={`/api/uploads/users/${selectedConversation.avatar}`}
+                src={`/api/uploads/users/${selectedConversation?.avatar}`}
               />
             </div>
           </div>
           <span className="text-gray-900 font-bold">
-            {selectedConversation.name}
+            {selectedConversation?.name}
           </span>
         </div>
         <IoClose

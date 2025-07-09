@@ -7,6 +7,7 @@ const Conversation = require("../models/Conversation");
 const mongoose = require("mongoose");
 const { logUserActivity } = require("../middleware/activityLogger");
 const AuditLog = require("../models/AuditLog");
+const { OAuth2Client } = require("google-auth-library");
 
 //Get all users information
 const getAllUsers = async (req, res) => {
@@ -647,6 +648,69 @@ const logoutAll = async (req, res) => {
   }
 };
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+exports.googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    const name = payload.name;
+    const avatar = payload.picture;
+    // Find or create user
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        email,
+        name,
+        avatar,
+        password: Math.random().toString(36).slice(-8), // random password
+        isGoogleUser: true,
+        role: "user",
+      });
+    }
+    // Issue JWT and set cookies
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+        sessionVersion: user.sessionVersion || 0,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.cookie("userId", user._id.toString(), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    res
+      .status(401)
+      .json({ message: "Google login failed", error: err.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   signUp,
@@ -666,4 +730,5 @@ module.exports = {
   getCurrentUser,
   logout,
   logoutAll,
+  googleLogin: exports.googleLogin,
 };

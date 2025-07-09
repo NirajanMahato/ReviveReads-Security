@@ -1,15 +1,18 @@
 import { formatDistanceToNowStrict } from "date-fns";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { MdOutlineBookmarkAdd } from "react-icons/md";
 import { RiMessage3Line } from "react-icons/ri";
 import { Link, useLocation } from "react-router-dom";
+import { UserContext } from "../../../context/UserContext";
 import { handleChatNow, handleSaveBook } from "../../../hooks/bookActions";
 import ChatModal from "./ChatModal";
 
 const BookCard = ({ products }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const authenticateToken = localStorage.getItem("token");
-  const userId = localStorage.getItem("id");
+
+  const { userInfo } = useContext(UserContext);
+  const userId = userInfo?._id;
+  const authenticateToken = userInfo;
 
   const handleOpenChatModal = async (sellerId) => {
     const chatReady = await handleChatNow(sellerId, authenticateToken);

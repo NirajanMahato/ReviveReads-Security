@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { format } from "date-fns";
+import React, { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { UserContext } from "../../../context/UserContext";
 
 const SoldCard = () => {
   const [soldBooks, setSoldBooks] = useState([]);
-  const authenticateToken = localStorage.getItem("token");
+  const { userInfo } = useContext(UserContext);
 
   const fetchSoldBooks = async () => {
-    if (!authenticateToken) {
+    if (!userInfo) {
       toast.error("Please log in to view sold books.");
       return;
     }
@@ -16,7 +16,7 @@ const SoldCard = () => {
     try {
       const response = await axios.get("/api/book/sold", {
         headers: {
-          Authorization: `Bearer ${authenticateToken}`,
+          Authorization: `Bearer ${userInfo.token}`,
         },
       });
       setSoldBooks(response.data);

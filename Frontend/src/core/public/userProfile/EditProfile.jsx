@@ -67,7 +67,7 @@ const EditProfile = ({ onClose }) => {
   };
 
   const headers = {
-    id: localStorage.getItem("id"),
+    id: userInfo?._id,
     authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 

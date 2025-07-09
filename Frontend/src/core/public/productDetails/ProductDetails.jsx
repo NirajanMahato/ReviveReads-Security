@@ -1,5 +1,5 @@
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { GoClockFill } from "react-icons/go";
 import { MdLocalShipping, MdOutlineBookmarkAdd } from "react-icons/md";
@@ -9,6 +9,7 @@ import { handleChatNow, handleSaveBook } from "../../../hooks/bookActions";
 
 import Navbar from "../../../components/Navbar";
 import SimpleMap from "../../../components/SimpleMap";
+import { UserContext } from "../../../context/UserContext";
 import useProductDetails from "../../../hooks/useProductDetails";
 import ChatModal from "../homePage/ChatModal";
 
@@ -17,7 +18,9 @@ const ProductDetails = () => {
   const { product, loading, error } = useProductDetails(bookId);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const authenticateToken = localStorage.getItem("token");
+  const { userInfo } = useContext(UserContext);
+
+  const authenticateToken = userInfo?.token;
   const handleOpenChatModal = async (sellerId) => {
     const chatReady = await handleChatNow(sellerId, authenticateToken);
     if (chatReady) {

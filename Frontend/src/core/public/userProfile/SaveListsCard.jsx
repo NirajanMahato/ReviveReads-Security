@@ -15,7 +15,7 @@ const SaveListsCard = () => {
       try {
         const response = await axios.get("/api/user/get-favorites-books", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${userInfo?.token}`,
           },
         });
         setSavedBooks(response.data);
@@ -24,7 +24,7 @@ const SaveListsCard = () => {
       }
     };
     fetchSavedBooks();
-  }, []);
+  }, [userInfo?.token]);
 
   const handleRemoveSavedBook = async (bookId) => {
     try {
@@ -32,7 +32,7 @@ const SaveListsCard = () => {
         `/api/user/remove-from-favorites/${bookId}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${userInfo?.token}`,
           },
         }
       );

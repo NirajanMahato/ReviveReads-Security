@@ -1,17 +1,19 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "../context/UserContext";
 
 const useBooks = () => {
   const [allBooks, setAllBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { userInfo } = useContext(UserContext);
 
   const fetchBooks = async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/book/get-all-books", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${userInfo?.token}`,
         },
       });
       const books = response?.data;

@@ -222,12 +222,13 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Secure token storage in httpOnly cookies.
 - Automatic token refresh and session management.
 
-### 26. **Simple Math CAPTCHA Integration**
+### 26. **Color-based CAPTCHA Integration**
 
-- Simple math problem CAPTCHA on registration (e.g., "What is 5 + 3?").
+- Color identification CAPTCHA on registration (e.g., "What color is this text?").
+- Text color doesn't match the text content, requiring human visual processing.
 - Client-side and server-side verification of CAPTCHA answers.
 - Prevents automated bot registrations and credential stuffing attacks.
-- User-friendly and less intrusive than traditional CAPTCHAs.
+- More challenging than math but still user-friendly.
 
 ---
 
@@ -248,7 +249,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Google OAuth 2.0 Integration
 - Real-time Messaging with WebSocket Security
 - React Context API for Secure State Management
-- Simple Math CAPTCHA Integration
+- Color-based CAPTCHA Integration
 
 ---
 

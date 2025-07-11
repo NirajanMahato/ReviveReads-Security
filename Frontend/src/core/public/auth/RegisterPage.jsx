@@ -35,9 +35,9 @@ const schema = yup
       ),
     captchaAnswer: yup
       .string()
-      .required("Please solve the math problem")
-      .test("captcha", "Incorrect answer", function (value) {
-        return value === this.parent.correctAnswer;
+      .required("Please type the characters shown")
+      .test("captcha", "Incorrect characters", function (value) {
+        return value === this.parent.captchaText;
       }),
   })
   .required();
@@ -52,8 +52,7 @@ const RegisterPage = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const { registerUser, loading } = useRegister();
-  const [captchaQuestion, setCaptchaQuestion] = useState("");
-  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [captchaText, setCaptchaText] = useState("");
   const [passwordChecks, setPasswordChecks] = useState({
     length: false,
     uppercase: false,
@@ -64,19 +63,17 @@ const RegisterPage = () => {
 
   const password = watch("password", "");
 
-  // Generate simple math CAPTCHA
   useEffect(() => {
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    const question = `What is ${num1} + ${num2}?`;
-    const answer = (num1 + num2).toString();
-
-    setCaptchaQuestion(question);
-    setCorrectAnswer(answer);
-    setValue("correctAnswer", answer);
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    let text = "";
+    for (let i = 0; i < 5; i++) {
+      text += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptchaText(text);
+    setValue("captchaText", text);
   }, [setValue]);
 
-  // Check password strength
+  // Password strength check
   useEffect(() => {
     if (password) {
       setPasswordChecks({
@@ -95,8 +92,8 @@ const RegisterPage = () => {
 
   return (
     <>
-      <div className="flex w-full h-screen mx-auto max-w-[1300px] pt-8 px-6 pb-4">
-        <div className="w-full lg:w-6/12">
+      <div className="flex w-full mx-auto max-w-[1300px] pt-8 px-6 pb-4">
+        <div className="w-full lg:w-6/12 pb-10">
           <Link to={"/"} className="-mt-2">
             <img
               src={logo2}
@@ -104,7 +101,7 @@ const RegisterPage = () => {
               className="cursor-pointer md:w-44 w-28"
             />
           </Link>
-          <div className="flex justify-center items-center flex-col md:mt-14 mt-20">
+          <div className="flex justify-center items-center flex-col mt-8">
             <h1 className="text-2xl md:text-3xl font-ppMori mb-1 flex">
               Welcome to ReviveReads
             </h1>
@@ -113,7 +110,7 @@ const RegisterPage = () => {
               onSubmit={handleSubmit(submit)}
               className="w-full flex flex-col items-center"
             >
-              <div className="md:w-6/12 w-11/12 h-12 border-solid border rounded-3xl border-gray-300 mt-14 flex items-center pl-4 pr-2">
+              <div className="md:w-6/12 w-11/12 h-12 border-solid border rounded-3xl border-gray-300 mt-8 flex items-center pl-4 pr-2">
                 <BsFillPersonFill
                   style={{
                     fontSize: "1.4rem",
@@ -231,18 +228,29 @@ const RegisterPage = () => {
                 </ul>
               </div>
 
-              {/* Simple Math CAPTCHA */}
               <div className="md:w-6/12 w-11/12 mt-4">
-                <div className="flex items-center justify-center space-x-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    {captchaQuestion}
+                <div className="flex flex-col items-center space-y-2">
+                  <span className="text-md font-semibold text-gray-700">
+                    Type the characters you see below:
                   </span>
-                  <input
-                    type="number"
-                    placeholder="Answer"
-                    className="w-20 h-8 border border-gray-300 rounded px-2 text-sm outline-none"
-                    {...register("captchaAnswer")}
-                  />
+                  <div className="flex w-full items-center justify-between space-x-2">
+                    <div
+                      className="text-lg font-bold px-4 py-2 rounded border bg-gray-100 tracking-widest select-none"
+                      style={{
+                        letterSpacing: "0.3em",
+                        fontFamily: "monospace",
+                        fontSize: "1.5rem",
+                      }}
+                    >
+                      {captchaText}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="w-32 flex-1 h-12 border border-gray-300 rounded px-2 text-sm outline-none text-center"
+                      {...register("captchaAnswer")}
+                    />
+                  </div>
                 </div>
                 {errors.captchaAnswer && (
                   <h6 className="text-red-500 text-xs text-center mt-1">
@@ -277,7 +285,7 @@ const RegisterPage = () => {
           </div>
         </div>
         <div
-          className="lg:w-6/12 relative bg-cover bg-center"
+          className="lg:w-6/12 h-screen relative bg-cover bg-center"
           style={{ backgroundImage: `url(${wallpaper})`, borderRadius: "15%" }}
         ></div>
       </div>

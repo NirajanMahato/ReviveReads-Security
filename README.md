@@ -33,14 +33,16 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 - **React.js** (UI library)
 - **Vite** (Build tool)
-- **Redux Toolkit** (State management)
+- **Zustand** (State management)
 - **React Router** (Routing)
-- **Yup & React Hook Form** (Form validation)
+- **React Hook Form** (Form validation)
 - **Axios** (HTTP requests)
 - **Tailwind CSS** (Styling)
 - **Playwright** (End-to-end testing)
 - **React Hot Toast** (Notifications)
 - **DOMPurify** (Strict input sanitization)
+- **Socket.io-client** (Real-time communication)
+- **Google Identity Services** (OAuth integration)
 
 ---
 
@@ -51,11 +53,14 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 1. `cd Backend`
 2. Install dependencies: `npm install`
 3. Create a `.env` file with the following variables:
-   - `MONGO_DB_URI=your_mongodb_uri`
-   - `JWT_SECRET=your_jwt_secret`
+   - `PORT=5000`
+   - `MONGODB_URI=your_mongodb_connection_string`
+   - `JWT_SECRET=your_jwt_secret_key`
+   - `JWT_REFRESH_SECRET=your_refresh_secret_key`
    - `EMAIL_USER=your_email@gmail.com`
-   - `EMAIL_PASS=your_email_password`
-   - `FRONTEND_URL=http://localhost:5173` (or your frontend URL)
+   - `EMAIL_PASS=your_email_app_password`
+   - `GOOGLE_CLIENT_ID=your_google_client_id`
+   - `GOOGLE_CLIENT_SECRET=your_google_client_secret`
 4. **Create a `logs/` directory** in `Backend` for logging if it does not exist: `mkdir logs`
 5. Start the server: `npm run dev`
 
@@ -63,7 +68,10 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 1. `cd Frontend`
 2. Install dependencies: `npm install`
-3. Start the frontend: `npm run dev`
+3. Create a `.env` file with the following variables:
+   - `VITE_API_URL=http://localhost:5000`
+   - `VITE_GOOGLE_CLIENT_ID=your_google_client_id`
+4. Start the frontend: `npm run dev`
 
 ---
 
@@ -73,6 +81,8 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 - All protected routes require a valid JWT token.
 - Tokens are signed with a secret and have a 3-day expiry.
+- JWT tokens are stored in httpOnly cookies for enhanced security.
+- Session versioning prevents token reuse after logout.
 
 ### 2. **Password Hashing**
 
@@ -89,6 +99,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 
 - Admin and user roles are enforced both in backend and frontend.
 - Admin-only routes are protected by middleware.
+- React Context API used for user state management instead of localStorage.
 
 ### 5. **Enhanced Input Validation & Sanitization**
 
@@ -186,6 +197,27 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Prevents XSS attacks by ensuring only safe HTML is rendered.
 - Utility functions for sanitizing both HTML and plain text content.
 
+### 23. **Google OAuth Integration**
+
+- Secure Google OAuth 2.0 authentication flow.
+- Google Identity Services integration for seamless login.
+- Automatic user account creation for new Google users.
+- Secure token verification on backend.
+
+### 24. **Real-time Messaging System**
+
+- WebSocket-based real-time messaging between users.
+- Secure socket authentication and message validation.
+- Message history and conversation management.
+- Real-time notifications for new messages.
+
+### 25. **Enhanced State Management**
+
+- Zustand for lightweight state management.
+- React Context API for user authentication state.
+- Secure token storage in httpOnly cookies.
+- Automatic token refresh and session management.
+
 ---
 
 ## Advanced Security Features
@@ -200,8 +232,11 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Comprehensive Input Validation & Sanitization
 - Enhanced File Upload Security with Rate Limiting
 - Socket.io Authentication
-- Additional Security Headers (Referrer-Policy, Permissions-Policy, Expect-CT)
+- Additional Security Headers (Referrer-Policy, Permissions-Policy)
 - CORS Protection with X-Requested-With Header
+- Google OAuth 2.0 Integration
+- Real-time Messaging with WebSocket Security
+- React Context API for Secure State Management
 
 ---
 

@@ -24,6 +24,7 @@ const {
 const { authenticateToken } = require("../middleware/userAuth");
 const { uploadUserAvatar } = require("../config/multerConfig");
 const { authLimiter } = require("../middleware/security");
+const { verifyCaptcha } = require("../middleware/recaptchaMiddleware");
 const {
   sanitizeInput,
   validateEmail,
@@ -32,7 +33,7 @@ const {
 } = require("../middleware/validation");
 
 router.post("/uploadImage", uploadUserAvatar, uploadImage);
-router.post("/sign-up", sanitizeInput, validateEmail, signUp);
+router.post("/sign-up", sanitizeInput, validateEmail, verifyCaptcha, signUp);
 router.post("/sign-in", sanitizeInput, validateEmail, authLimiter, signIn);
 router.get("/get-all-users", authenticateToken, getAllUsers);
 router.get("/get-user-by-id/:id", getUserById);

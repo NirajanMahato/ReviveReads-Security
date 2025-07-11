@@ -53,6 +53,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 1. `cd Backend`
 2. Install dependencies: `npm install`
 3. Create a `.env` file with the following variables:
+
    - `PORT=5000`
    - `MONGODB_URI=your_mongodb_connection_string`
    - `JWT_SECRET=your_jwt_secret_key`
@@ -61,6 +62,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
    - `EMAIL_PASS=your_email_app_password`
    - `GOOGLE_CLIENT_ID=your_google_client_id`
    - `GOOGLE_CLIENT_SECRET=your_google_client_secret`
+
 4. **Create a `logs/` directory** in `Backend` for logging if it does not exist: `mkdir logs`
 5. Start the server: `npm run dev`
 
@@ -69,8 +71,10 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 1. `cd Frontend`
 2. Install dependencies: `npm install`
 3. Create a `.env` file with the following variables:
+
    - `VITE_API_URL=http://localhost:5000`
    - `VITE_GOOGLE_CLIENT_ID=your_google_client_id`
+
 4. Start the frontend: `npm run dev`
 
 ---
@@ -218,6 +222,13 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Secure token storage in httpOnly cookies.
 - Automatic token refresh and session management.
 
+### 26. **Simple Math CAPTCHA Integration**
+
+- Simple math problem CAPTCHA on registration (e.g., "What is 5 + 3?").
+- Client-side and server-side verification of CAPTCHA answers.
+- Prevents automated bot registrations and credential stuffing attacks.
+- User-friendly and less intrusive than traditional CAPTCHAs.
+
 ---
 
 ## Advanced Security Features
@@ -237,6 +248,7 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Google OAuth 2.0 Integration
 - Real-time Messaging with WebSocket Security
 - React Context API for Secure State Management
+- Simple Math CAPTCHA Integration
 
 ---
 

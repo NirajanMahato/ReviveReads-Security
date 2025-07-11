@@ -1,6 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { BsFillPersonFill } from "react-icons/bs";
+import { FaCheck } from "react-icons/fa";
 import { IoMdLock } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 import { Link } from "react-router-dom";
@@ -31,6 +33,12 @@ const schema = yup
         /[!@#$%^&*(),.?":{}|<>]/,
         'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)'
       ),
+    captchaAnswer: yup
+      .string()
+      .required("Please solve the math problem")
+      .test("captcha", "Incorrect answer", function (value) {
+        return value === this.parent.correctAnswer;
+      }),
   })
   .required();
 
@@ -39,9 +47,47 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm({ resolver: yupResolver(schema) });
 
   const { registerUser, loading } = useRegister();
+  const [captchaQuestion, setCaptchaQuestion] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [passwordChecks, setPasswordChecks] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false,
+  });
+
+  const password = watch("password", "");
+
+  // Generate simple math CAPTCHA
+  useEffect(() => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const question = `What is ${num1} + ${num2}?`;
+    const answer = (num1 + num2).toString();
+
+    setCaptchaQuestion(question);
+    setCorrectAnswer(answer);
+    setValue("correctAnswer", answer);
+  }, [setValue]);
+
+  // Check password strength
+  useEffect(() => {
+    if (password) {
+      setPasswordChecks({
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      });
+    }
+  }, [password]);
 
   const submit = async (data) => {
     await registerUser(data);
@@ -131,13 +177,80 @@ const RegisterPage = () => {
                 <p className="text-xs text-gray-600">
                   Password must contain at least 8 characters, including:
                 </p>
-                <ul className="text-xs text-gray-500 ml-4 mt-1">
-                  <li>• One uppercase letter (A-Z)</li>
-                  <li>• One lowercase letter (a-z)</li>
-                  <li>• One number (0-9)</li>
-                  <li>• One special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                <ul className="text-xs text-gray-500 ml-4 mt-1 space-y-1">
+                  <li
+                    className={`flex items-center ${
+                      passwordChecks.length ? "text-green-600" : ""
+                    }`}
+                  >
+                    {passwordChecks.length && (
+                      <FaCheck className="text-green-500 mr-2" />
+                    )}
+                    • At least 8 characters
+                  </li>
+                  <li
+                    className={`flex items-center ${
+                      passwordChecks.uppercase ? "text-green-600" : ""
+                    }`}
+                  >
+                    {passwordChecks.uppercase && (
+                      <FaCheck className="text-green-500 mr-2" />
+                    )}
+                    • One uppercase letter (A-Z)
+                  </li>
+                  <li
+                    className={`flex items-center ${
+                      passwordChecks.lowercase ? "text-green-600" : ""
+                    }`}
+                  >
+                    {passwordChecks.lowercase && (
+                      <FaCheck className="text-green-500 mr-2" />
+                    )}
+                    • One lowercase letter (a-z)
+                  </li>
+                  <li
+                    className={`flex items-center ${
+                      passwordChecks.number ? "text-green-600" : ""
+                    }`}
+                  >
+                    {passwordChecks.number && (
+                      <FaCheck className="text-green-500 mr-2" />
+                    )}
+                    • One number (0-9)
+                  </li>
+                  <li
+                    className={`flex items-center ${
+                      passwordChecks.special ? "text-green-600" : ""
+                    }`}
+                  >
+                    {passwordChecks.special && (
+                      <FaCheck className="text-green-500 mr-2" />
+                    )}
+                    • One special character (!@#$%^&*(),.?":{}|&lt;&gt;)
+                  </li>
                 </ul>
               </div>
+
+              {/* Simple Math CAPTCHA */}
+              <div className="md:w-6/12 w-11/12 mt-4">
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    {captchaQuestion}
+                  </span>
+                  <input
+                    type="number"
+                    placeholder="Answer"
+                    className="w-20 h-8 border border-gray-300 rounded px-2 text-sm outline-none"
+                    {...register("captchaAnswer")}
+                  />
+                </div>
+                {errors.captchaAnswer && (
+                  <h6 className="text-red-500 text-xs text-center mt-1">
+                    {errors.captchaAnswer?.message}
+                  </h6>
+                )}
+              </div>
+
               <button
                 type="submit"
                 className="mt-8 md:w-6/12 w-11/12 flex justify-center items-center rounded-3xl h-12 bg-black text-white text-lg font-normal transition duration-200 ease-in-out hover:bg-[#403a4f] hover:font-semibold"

@@ -16,9 +16,7 @@ const useSendMessage = () => {
         `/api/messages/send/${selectedConversation._id}`,
         { message },
         {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
+          withCredentials: true,
         }
       );
 

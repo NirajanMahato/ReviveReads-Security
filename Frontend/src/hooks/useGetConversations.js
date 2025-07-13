@@ -1,28 +1,22 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { UserContext } from "../context/UserContext";
 
 const useGetConversations = () => {
-  const { userInfo } = useContext(UserContext);
   const [loading, setLoading] = useState(false);
   const [conversations, setConversations] = useState([]);
+  const { userInfo } = useContext(UserContext);
 
   useEffect(() => {
     const getConversations = async () => {
       setLoading(true);
       try {
         const res = await axios.get("/api/user/get-users-for-sidebar", {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
+          withCredentials: true,
         });
         setConversations(res.data);
       } catch (error) {
-        const errorMessage = error.response
-          ? error.response.data.error
-          : error.message;
-        toast.error(errorMessage);
+        console.error(error);
       } finally {
         setLoading(false);
       }

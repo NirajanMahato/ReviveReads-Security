@@ -3,7 +3,16 @@ const User = require("../models/User");
 
 const verifyAdmin = async (req, res, next) => {
   try {
-    const token = req.header("Authorization").replace("Bearer ", "");
+    let token;
+
+    // Check for token in Authorization header first
+    if (req.header("Authorization")) {
+      token = req.header("Authorization").replace("Bearer ", "");
+    }
+    // If no Authorization header, check for token in cookies
+    else if (req.cookies.token) {
+      token = req.cookies.token;
+    }
 
     if (!token) {
       return res.status(401).json({ message: "No token provided!" });

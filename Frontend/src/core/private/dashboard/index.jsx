@@ -69,7 +69,7 @@ const Dashboard = () => {
   const summaryCards = [
     {
       id: 1,
-      value: summary.totalBooksCount,
+      value: summary?.totalBooksCount,
       label: "Total Listings",
       bgColor: "bg-red-100",
       icon: <FaCartShopping />,
@@ -78,17 +78,17 @@ const Dashboard = () => {
     },
     {
       id: 2,
-      value: summary.booksPending,
+      value: summary?.booksPending,
       label: "Books pending",
       bgColor: "bg-yellow-100",
       icon: <FaSackDollar />,
       iconBgColor: "bg-yellow-500",
       link: "/admin/booklistings",
-      showDot: summary.booksPending > 0,
+      showDot: summary?.booksPending > 0,
     },
     {
       id: 3,
-      value: summary.newUsersCount,
+      value: summary?.newUsersCount,
       label: "New Users",
       bgColor: "bg-purple-100",
       icon: <FaUserPlus />,
@@ -97,7 +97,7 @@ const Dashboard = () => {
     },
     {
       id: 4,
-      value: summary.newBooksCount,
+      value: summary?.newBooksCount,
       label: "New Books Added",
       bgColor: "bg-green-100",
       icon: <FaBook />,

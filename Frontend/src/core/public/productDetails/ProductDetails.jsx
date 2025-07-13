@@ -20,9 +20,8 @@ const ProductDetails = () => {
 
   const { userInfo } = useContext(UserContext);
 
-  const authenticateToken = userInfo?.token;
   const handleOpenChatModal = async (sellerId) => {
-    const chatReady = await handleChatNow(sellerId, authenticateToken);
+    const chatReady = await handleChatNow(sellerId);
     if (chatReady) {
       setIsChatOpen(true); // Open modal only if chat setup is successful
     }
@@ -138,7 +137,7 @@ const ProductDetails = () => {
 
           <div className="flex items-center space-x-4 mt-6 lg:pr-14">
             <button
-              onClick={() => handleSaveBook(product?._id, authenticateToken)}
+              onClick={() => handleSaveBook(product?._id)}
               className="rounded-lg shadow-lg flex items-center justify-center w-1/2 bg-black hover:bg-gray-800 text-white py-3"
             >
               <MdOutlineBookmarkAdd className="md:text-xl  mr-1" />

@@ -1,14 +1,17 @@
-import React from "react";
 import {
-  useReactTable,
-  getCoreRowModel,
   flexRender,
+  getCoreRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
+import React from "react";
 
 const DataTable = ({ columns, data }) => {
+  // Ensure data is always an array
+  const safeData = data || [];
+
   // Setup table instance
   const table = useReactTable({
-    data,
+    data: safeData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -20,8 +23,14 @@ const DataTable = ({ columns, data }) => {
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th key={header.id} className="px-2 py-3 text-gray-700 uppercase">
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                <th
+                  key={header.id}
+                  className="px-2 py-3 text-gray-700 uppercase"
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                 </th>
               ))}
             </tr>

@@ -12,10 +12,9 @@ const BookCard = ({ products }) => {
 
   const { userInfo } = useContext(UserContext);
   const userId = userInfo?._id;
-  const authenticateToken = userInfo;
 
   const handleOpenChatModal = async (sellerId) => {
-    const chatReady = await handleChatNow(sellerId, authenticateToken);
+    const chatReady = await handleChatNow(sellerId);
     if (chatReady) {
       setIsChatOpen(true); // Open modal only if chat setup is successful
     }
@@ -96,7 +95,7 @@ const BookCard = ({ products }) => {
             </div>
             <div className="flex mt-3 justify-between text-gray-600">
               <button
-                onClick={() => handleSaveBook(product?._id, authenticateToken)}
+                onClick={() => handleSaveBook(product?._id)}
                 disabled={product?.seller?._id === userId}
                 className="flex items-center hover:text-yellow-600"
               >

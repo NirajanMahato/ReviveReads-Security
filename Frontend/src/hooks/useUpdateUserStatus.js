@@ -18,9 +18,7 @@ const useUpdateUserStatus = () => {
             lastActivity: new Date(), // Set current timestamp as the last activity
           },
           {
-            headers: {
-              Authorization: `Bearer ${userInfo?.token}`, // Pass token for authorization
-            },
+            withCredentials: true,
           }
         );
       } catch (error) {
@@ -42,9 +40,7 @@ const useUpdateUserStatus = () => {
             lastActivity: new Date(),
           },
           {
-            headers: {
-              Authorization: `Bearer ${userInfo?.token}`,
-            },
+            withCredentials: true,
           }
         );
       } catch (error) {
@@ -58,7 +54,7 @@ const useUpdateUserStatus = () => {
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
     };
-  }, [userId, userInfo?.token]);
+  }, [userId]);
 };
 
 export default useUpdateUserStatus;

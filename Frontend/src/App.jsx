@@ -32,6 +32,7 @@ const NotificationsPage = lazy(() =>
   import("./core/public/notifications/NotificationsPage")
 );
 const Settings = lazy(() => import("./core/private/settings"));
+const SecurityDashboard = lazy(() => import("./core/private/security"));
 
 function App() {
   const dispatch = useDispatch();
@@ -133,6 +134,7 @@ function App() {
               <Route path="dashboard" element={<DashboardIndex />} />
               <Route path="users" element={<UserIndex />} />
               <Route path="booklistings" element={<BookListings />} />
+              <Route path="security" element={<SecurityDashboard />} />
               <Route path="settings" element={<Settings />} />
             </Route>
 

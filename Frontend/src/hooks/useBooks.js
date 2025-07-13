@@ -12,9 +12,7 @@ const useBooks = () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/book/get-all-books", {
-        headers: {
-          Authorization: `Bearer ${userInfo?.token}`,
-        },
+        withCredentials: true,
       });
       const books = response?.data;
 

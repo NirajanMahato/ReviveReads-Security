@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { createContext, useContext } from "react";
+import { FaShieldAlt } from "react-icons/fa";
 import { FaBook } from "react-icons/fa6";
 import { FiSettings, FiUsers } from "react-icons/fi";
 import { PiChartLine } from "react-icons/pi";
@@ -33,7 +34,13 @@ export default function Sidebar({ expanded, onToggle }) {
       label: "Book Listings",
       path: "/admin/booklistings",
     },
-    { id: 4, icon: <FiSettings />, label: "Settings", path: "/admin/settings" },
+    {
+      id: 4,
+      icon: <FaShieldAlt />,
+      label: "Security",
+      path: "/admin/security",
+    },
+    { id: 5, icon: <FiSettings />, label: "Settings", path: "/admin/settings" },
   ];
 
   return (

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 const useDashboardGraphs = () => {
   const [bookListingsData, setBookListingsData] = useState([]);
@@ -10,11 +10,15 @@ const useDashboardGraphs = () => {
     const fetchGraphData = async () => {
       try {
         // Fetch Book Listings Data
-        const bookResponse = await axios.get("/api/admin/book-listings-stats");
+        const bookResponse = await axios.get("/api/admin/book-listings-stats", {
+          withCredentials: true,
+        });
         setBookListingsData(bookResponse.data);
 
         // Fetch User Activity Data
-        const userResponse = await axios.get("/api/admin/user-activity-stats");
+        const userResponse = await axios.get("/api/admin/user-activity-stats", {
+          withCredentials: true,
+        });
         setUserActivityData(userResponse.data);
 
         setLoading(false);

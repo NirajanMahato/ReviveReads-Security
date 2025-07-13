@@ -3,33 +3,28 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../context/UserContext";
 
 const useDashboardSummary = () => {
-  const [summary, setSummary] = useState({
-    newUsersCount: 0,
-    newBooksCount: 0,
-    totalBooksCount: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { userInfo } = useContext(UserContext);
 
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const { data } = await axios.get("/api/admin/summary", {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-          withCredentials: true,
-        });
-        setSummary(data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching dashboard summary:", err);
-        setError(err);
-        setLoading(false);
-      }
-    };
+  const fetchSummary = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get("/api/admin/dashboard-summary", {
+        withCredentials: true,
+      });
+      setSummary(response.data);
+    } catch (error) {
+      console.error("Error fetching dashboard summary:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSummary();
   }, []);
 

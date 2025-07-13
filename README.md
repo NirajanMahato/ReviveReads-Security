@@ -1,52 +1,199 @@
-# ReviveReads
+# ReviveReads - Secure Book Marketplace
 
-A secure book marketplace web application.
+A secure, full-stack book marketplace application built with React frontend and Node.js/Express backend, featuring comprehensive security measures and modern web technologies.
 
-## Project Overview
+## Features
 
-ReviveReads is a full-stack web application for buying, selling, and exchanging books. The project is designed with a strong focus on modern web security best practices, making it an ideal submission for a security-focused assignment.
+### Core Functionality
 
----
+- **User Authentication & Authorization**
 
-## Tools & Technologies Used
+  - JWT-based authentication with httpOnly cookies
+  - Role-based access control (User/Admin)
+  - Google OAuth integration
+  - Two-factor authentication via email OTP
+  - Password reset functionality
 
-### Backend
+- **Book Management**
 
-- **Node.js** (JavaScript runtime)
-- **Express.js** (Web framework)
-- **MongoDB** (Database)
-- **Mongoose** (MongoDB ODM)
-- **bcryptjs** (Password hashing)
-- **jsonwebtoken** (JWT authentication)
-- **nodemailer** (Email sending)
-- **multer** (File uploads)
-- **dotenv** (Environment variable management)
-- **socket.io** (Real-time communication)
-- **helmet** (Security HTTP headers, CSP)
-- **xss-clean** (XSS protection)
-- **express-rate-limit** (Rate limiting)
-- **morgan** (HTTP request logging)
-- **winston** (Advanced logging)
-- **Modular security middleware** (All security logic in `middleware/security.js`)
+  - Book listings with search and filtering
+  - Book details with images and descriptions
+  - User book management (add, edit, delete)
+  - Admin book approval system
+
+- **Messaging System**
+
+  - Real-time messaging between users
+  - WebSocket integration for instant updates
+  - Message history and conversation management
+
+- **User Profiles**
+
+  - User profile management
+  - Analytics and dashboard
+  - Saved lists and book tracking
+
+- **Notifications**
+
+  - Real-time notifications
+  - Email notifications
+  - In-app notification system
+
+- **Admin Dashboard**
+  - User management
+  - Book listings management
+  - System settings
+  - **Security Monitoring Dashboard** (NEW)
+    - Real-time security metrics
+    - Activity logs and audit trails
+    - Security event monitoring
+    - System health indicators
+    - Suspicious IP tracking
+    - Export capabilities
+
+### Security Features
+
+- **Authentication Security**
+
+  - JWT tokens with httpOnly cookies
+  - Session management with versioning
+  - Secure password policies
+  - Account lockout protection
+
+- **Data Protection**
+
+  - Input validation and sanitization
+  - XSS protection with DOMPurify
+  - CSRF protection
+  - SQL injection prevention
+
+- **File Upload Security**
+
+  - File type validation
+  - File size limits
+  - Secure file storage
+
+- **API Security**
+
+  - Rate limiting
+  - Security headers (Helmet)
+  - CORS configuration
+  - Audit logging
+
+- **Security Monitoring** (NEW)
+  - Real-time security event tracking
+  - Activity logging and analytics
+  - Security metrics dashboard
+  - Suspicious activity detection
+  - IP address monitoring
+  - System health monitoring
+  - Export and reporting capabilities
+
+## 🛠 Tech Stack
 
 ### Frontend
 
-- **React.js** (UI library)
-- **Vite** (Build tool)
-- **Zustand** (State management)
-- **React Router** (Routing)
-- **React Hook Form** (Form validation)
-- **Axios** (HTTP requests)
-- **Tailwind CSS** (Styling)
-- **Playwright** (End-to-end testing)
-- **React Hot Toast** (Notifications)
-- **DOMPurify** (Strict input sanitization)
-- **Socket.io-client** (Real-time communication)
-- **Google Identity Services** (OAuth integration)
+- **React 18** - UI framework
+- **Vite** - Build tool and dev server
+- **React Router** - Client-side routing
+- **Zustand** - State management
+- **Tailwind CSS** - Styling
+- **Axios** - HTTP client
+- **Socket.io-client** - Real-time communication
+- **DOMPurify** - XSS protection
+- **React Hook Form** - Form handling
+- **Chart.js** - Data visualization
+- **TanStack Table** - Data tables
 
----
+### Backend
 
-## Setup Instructions
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **MongoDB** - Database
+- **Mongoose** - ODM
+- **JWT** - Authentication
+- **bcrypt** - Password hashing
+- **Nodemailer** - Email service
+- **Socket.io** - Real-time communication
+- **Multer** - File upload handling
+- **Helmet** - Security headers
+- **Rate Limiting** - API protection
+- **Winston** - Logging
+- **Morgan** - HTTP request logging
+
+## Security Implementation
+
+### Authentication & Authorization
+
+- JWT tokens stored in httpOnly cookies
+- Role-based access control (User/Admin)
+- Session versioning for security
+- Account lockout after failed attempts
+
+### Data Validation
+
+- Input sanitization and validation
+- File upload security with type checking
+- SQL injection prevention
+- XSS protection with DOMPurify
+
+### API Security
+
+- Rate limiting on all endpoints
+- Security headers via Helmet
+- CORS configuration
+- Audit logging for sensitive operations
+
+### Real-time Security
+
+- WebSocket authentication
+- Message validation
+- User status tracking
+
+### Security Monitoring Dashboard
+
+The Security Monitoring Dashboard provides comprehensive real-time monitoring of system security:
+
+#### Real-time Metrics
+
+- **Failed Login Attempts** - Track failed authentication attempts in the last hour
+- **Suspicious Activities** - Monitor suspicious behavior patterns
+- **Rate Limit Violations** - Track API abuse attempts
+- **Locked Accounts** - Monitor account security status
+
+#### System Health
+
+- **Total Users** - System user count
+- **Active Users** - Currently active users
+- **Active Rate** - Percentage of active users
+
+#### Security Analytics
+
+- **24-Hour Activity Trends** - Visualize system activity patterns
+- **Security Event Trends** - Track security incidents over time
+- **Severity Distribution** - Analyze event severity levels
+- **Top Actions** - Most common user actions
+
+#### Monitoring Features
+
+- **Suspicious IP Tracking** - Identify and monitor suspicious IP addresses
+- **Security Events Table** - Detailed view of recent security incidents
+- **Activity Logs** - Comprehensive audit trail with filtering
+- **Export Capabilities** - Export logs in CSV format for analysis
+
+#### Alert System
+
+- **Visual Alerts** - Pulsing indicators for critical metrics
+- **Real-time Updates** - Automatic refresh every 30 seconds
+- **Threshold Monitoring** - Alerts when metrics exceed thresholds
+
+## Installation & Setup
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- MongoDB
+- npm or yarn
 
 ### Backend
 
@@ -54,12 +201,11 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 2. Install dependencies: `npm install`
 3. Create a `.env` file with the following variables:
 
-   - `PORT=5000`
-   - `MONGODB_URI=your_mongodb_connection_string`
-   - `JWT_SECRET=your_jwt_secret_key`
-   - `JWT_REFRESH_SECRET=your_refresh_secret_key`
-   - `EMAIL_USER=your_email@gmail.com`
-   - `EMAIL_PASS=your_email_app_password`
+   - `JWT_SECRET=your_jwt_secret`
+   - `MONGO_DB_URI=your_mongodb_connection_string`
+   - `EMAIL_USER=your_email`
+   - `EMAIL_PASS=your_email_password`
+   - `FRONTEND_URL=http://localhost:4000`
    - `GOOGLE_CLIENT_ID=your_google_client_id`
    - `GOOGLE_CLIENT_SECRET=your_google_client_secret`
 
@@ -222,13 +368,24 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Secure token storage in httpOnly cookies.
 - Automatic token refresh and session management.
 
-### 26. **Color-based CAPTCHA Integration**
+### 26. **Characters Typing CAPTCHA Integration**
 
-- Color identification CAPTCHA on registration (e.g., "What color is this text?").
-- Text color doesn't match the text content, requiring human visual processing.
+- Simple character-based CAPTCHA on registration.
+- Users must type a random 5-character string exactly.
 - Client-side and server-side verification of CAPTCHA answers.
 - Prevents automated bot registrations and credential stuffing attacks.
-- More challenging than math but still user-friendly.
+- User-friendly and accessible.
+
+### 27. **Security Monitoring Dashboard** (NEW)
+
+- **Real-time Security Metrics**: Monitor failed logins, suspicious activities, rate limit violations, and locked accounts in real-time.
+- **System Health Monitoring**: Track total users, active users, and system activity rates.
+- **Security Analytics**: Visualize security event trends, severity distributions, and activity patterns.
+- **Suspicious IP Tracking**: Identify and monitor IP addresses with suspicious activity patterns.
+- **Comprehensive Audit Logs**: Detailed activity logs with filtering and search capabilities.
+- **Export Functionality**: Export security logs in CSV format for external analysis.
+- **Alert System**: Visual alerts for critical security metrics with configurable thresholds.
+- **Real-time Updates**: Automatic refresh every 30 seconds to ensure current data.
 
 ---
 
@@ -249,7 +406,8 @@ ReviveReads is a full-stack web application for buying, selling, and exchanging 
 - Google OAuth 2.0 Integration
 - Real-time Messaging with WebSocket Security
 - React Context API for Secure State Management
-- Color-based CAPTCHA Integration
+- Characters Typing CAPTCHA Integration
+- **Security Monitoring Dashboard with Real-time Analytics**
 
 ---
 

@@ -45,12 +45,13 @@ ChartJS.register(
 const SecurityDashboard = () => {
   const { userInfo } = useContext(UserContext);
   const {
-    securityMetrics,
-    userActivityStats,
-    bookListingsStats,
+    securityStats,
+    securityEvents,
+    activityLogs,
     loading,
     error,
     refreshData,
+    fetchActivityLogs,
   } = useSecurityMonitoring();
 
   const {
@@ -67,62 +68,10 @@ const SecurityDashboard = () => {
     userEmail: "",
   });
 
-  // Mock data for DataTable components since the current hook doesn't provide detailed logs
-  const [securityEvents] = useState([
-    {
-      id: 1,
-      createdAt: new Date().toISOString(),
-      action: "LOGIN_FAILED",
-      severity: "medium",
-      userEmail: "user@example.com",
-      ipAddress: "192.168.1.1",
-      details: "Multiple failed login attempts",
-    },
-    {
-      id: 2,
-      createdAt: new Date().toISOString(),
-      action: "SUSPICIOUS_ACTIVITY",
-      severity: "high",
-      userEmail: "admin@example.com",
-      ipAddress: "10.0.0.1",
-      details: "Unusual access pattern detected",
-    },
-  ]);
-
-  const [activityLogs] = useState({
-    logs: [
-      {
-        id: 1,
-        createdAt: new Date().toISOString(),
-        action: "USER_LOGIN",
-        severity: "low",
-        status: "success",
-        userEmail: "user@example.com",
-        ipAddress: "192.168.1.1",
-        details: "Successful login",
-      },
-      {
-        id: 2,
-        createdAt: new Date().toISOString(),
-        action: "BOOK_CREATED",
-        severity: "low",
-        status: "success",
-        userEmail: "seller@example.com",
-        ipAddress: "10.0.0.2",
-        details: "New book listing created",
-      },
-    ],
-    pagination: {
-      currentPage: 1,
-      totalPages: 1,
-      totalItems: 2,
-    },
-  });
-
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    // In a real implementation, this would call fetchActivityLogs(newFilters)
+    fetchActivityLogs(newFilters);
   };
 
   const handleRefresh = () => {
@@ -133,9 +82,6 @@ const SecurityDashboard = () => {
   const exportLogs = async () => {
     try {
       const response = await fetch("/api/activity-logs/export?format=csv", {
-        headers: {
-          Authorization: `Bearer ${userInfo?.token}`,
-        },
         credentials: "include",
       });
       const blob = await response.blob();
@@ -149,36 +95,39 @@ const SecurityDashboard = () => {
     }
   };
 
-  // Security Summary Cards - using metricsData instead of securityStats
+  // Security Summary Cards - using securityStats from real data
   const securityCards = [
     {
       id: 1,
-      title: "Total Users",
-      value: metricsData?.totalUsers || 0,
+      title: "Total Activities",
+      value: securityStats?.totalActivities || 0,
       icon: <FaEye className="text-blue-500" />,
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
     },
     {
       id: 2,
-      title: "Security Events (1h)",
-      value: metricsData?.recentSecurityEvents || 0,
+      title: "Security Events",
+      value: securityStats?.securityEvents || 0,
       icon: <FaExclamationTriangle className="text-red-500" />,
       bgColor: "bg-red-50",
       borderColor: "border-red-200",
     },
     {
       id: 3,
-      title: "Failed Logins (1h)",
-      value: metricsData?.failedLogins || 0,
+      title: "High Severity",
+      value:
+        securityStats?.severityStats?.find((s) => s._id === "high")?.count || 0,
       icon: <FaShieldAlt className="text-orange-500" />,
       bgColor: "bg-orange-50",
       borderColor: "border-orange-200",
     },
     {
       id: 4,
-      title: "Suspicious Activities (1h)",
-      value: metricsData?.suspiciousActivities || 0,
+      title: "Critical Events",
+      value:
+        securityStats?.severityStats?.find((s) => s._id === "critical")
+          ?.count || 0,
       icon: <FaUserShield className="text-purple-500" />,
       bgColor: "bg-purple-50",
       borderColor: "border-purple-200",
@@ -260,22 +209,19 @@ const SecurityDashboard = () => {
     },
   ];
 
-  // Chart Data - using available data or fallback
+  // Chart Data - using real data from securityStats
   const hourlyActivityData = {
-    labels: userActivityStats?.map((stat) => stat._id) || [
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-      "Sun",
+    labels: securityStats?.hourlyStats?.map((stat) => `${stat._id}:00`) || [
+      "00:00",
+      "06:00",
+      "12:00",
+      "18:00",
     ],
     datasets: [
       {
-        label: "User Registrations",
-        data: userActivityStats?.map((stat) => stat.count) || [
-          0, 0, 0, 0, 0, 0, 0,
+        label: "Activities per Hour",
+        data: securityStats?.hourlyStats?.map((stat) => stat.count) || [
+          0, 0, 0, 0,
         ],
         backgroundColor: "rgba(59, 130, 246, 0.6)",
         borderColor: "rgba(59, 130, 246, 1)",
@@ -286,10 +232,14 @@ const SecurityDashboard = () => {
   };
 
   const severityDistributionData = {
-    labels: ["Low", "Medium", "High", "Critical"],
+    labels: securityStats?.severityStats?.map((stat) =>
+      stat._id.toUpperCase()
+    ) || ["Low", "Medium", "High", "Critical"],
     datasets: [
       {
-        data: [10, 5, 3, 1], // Fallback data
+        data: securityStats?.severityStats?.map((stat) => stat.count) || [
+          0, 0, 0, 0,
+        ],
         backgroundColor: [
           "rgba(34, 197, 94, 0.8)", // Green for low
           "rgba(59, 130, 246, 0.8)", // Blue for medium
@@ -303,16 +253,18 @@ const SecurityDashboard = () => {
   };
 
   const topActionsData = {
-    labels: metricsData?.topActions?.map((action) =>
+    labels: securityStats?.topActions?.map((action) =>
       action._id.replace(/_/g, " ")
-    ),
+    ) || ["Login", "Book Create", "Profile Update"],
     datasets: [
       {
         label: "Action Count",
-        data: metricsData?.topActions?.map((action) => action.count),
+        data: securityStats?.topActions?.map((action) => action.count) || [
+          0, 0, 0,
+        ],
         backgroundColor: "rgba(147, 51, 234, 0.6)",
         borderColor: "rgba(147, 51, 234, 1)",
-        borderWidth: 1,
+        borderWidth: 2,
       },
     ],
   };
@@ -536,12 +488,12 @@ const SecurityDashboard = () => {
           <h1 className="text-2xl font-bold text-gray-900">
             Security Monitoring Dashboard
           </h1>
-          {securityMetrics?.lastUpdated && (
+          {securityStats?.lastUpdated && (
             <p className="text-sm text-gray-600 mt-1">
               Last updated:{" "}
               {(() => {
                 try {
-                  const date = new Date(securityMetrics.lastUpdated);
+                  const date = new Date(securityStats.lastUpdated);
                   if (isNaN(date.getTime())) return "Invalid Date";
                   return format(date, "dd MMM yyyy, HH:mm:ss");
                 } catch (error) {
@@ -681,45 +633,8 @@ const SecurityDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Severity Distribution</h3>
-          <Doughnut
-            data={severityDistributionData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: "bottom",
-                },
-              },
-            }}
-          />
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Top Actions</h3>
-          <Bar
-            data={topActionsData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  display: false,
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
       {/* Suspicious IP Addresses */}
-      {securityMetrics?.topSuspiciousIPs?.length > 0 && (
+      {securityStats?.topSuspiciousIPs?.length > 0 && (
         <div className="bg-white rounded-lg shadow mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -728,7 +643,7 @@ const SecurityDashboard = () => {
           </div>
           <div className="p-6">
             <DataTable
-              data={securityMetrics?.topSuspiciousIPs}
+              data={securityStats?.topSuspiciousIPs}
               columns={suspiciousIPColumns}
               pagination={false}
             />

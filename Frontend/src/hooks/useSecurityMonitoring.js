@@ -3,84 +3,109 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../context/UserContext";
 
 const useSecurityMonitoring = () => {
-  const [securityMetrics, setSecurityMetrics] = useState(null);
-  const [userActivityStats, setUserActivityStats] = useState(null);
-  const [bookListingsStats, setBookListingsStats] = useState(null);
+  const [securityStats, setSecurityStats] = useState(null);
+  const [securityEvents, setSecurityEvents] = useState([]);
+  const [activityLogs, setActivityLogs] = useState({
+    logs: [],
+    pagination: {},
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { userInfo } = useContext(UserContext);
 
-  const fetchSecurityMetrics = async () => {
-    setLoading(true);
-    setError(null);
+  const fetchSecurityStats = async () => {
     try {
-      const response = await axios.get("/api/admin/security-metrics", {
+      const response = await axios.get("/api/activity-logs/stats", {
         withCredentials: true,
       });
-      setSecurityMetrics(response.data);
+      setSecurityStats(response.data);
     } catch (error) {
-      console.error("Error fetching security metrics:", error);
+      console.error("Error fetching security stats:", error);
       setError(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const fetchUserActivityStats = async () => {
+  const fetchSecurityEvents = async () => {
     try {
-      const response = await axios.get("/api/admin/user-activity-stats", {
-        withCredentials: true,
-      });
-      setUserActivityStats(response.data);
+      const response = await axios.get(
+        "/api/activity-logs/security-events?limit=50",
+        {
+          withCredentials: true,
+        }
+      );
+      setSecurityEvents(response.data);
     } catch (error) {
-      console.error("Error fetching user activity stats:", error);
+      console.error("Error fetching security events:", error);
+      setError(error.message);
     }
   };
 
-  const fetchBookListingsStats = async () => {
+  const fetchActivityLogs = async (filters = {}) => {
     try {
-      const response = await axios.get("/api/admin/book-listings-stats", {
+      const params = new URLSearchParams({
+        page: filters.page || 1,
+        limit: filters.limit || 20,
+        ...filters,
+      });
+
+      const response = await axios.get(`/api/activity-logs?${params}`, {
         withCredentials: true,
       });
-      setBookListingsStats(response.data);
+      setActivityLogs(response.data);
     } catch (error) {
-      console.error("Error fetching book listings stats:", error);
+      console.error("Error fetching activity logs:", error);
+      setError(error.message);
     }
   };
 
   useEffect(() => {
     const loadSecurityData = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchSecurityMetrics(),
-        fetchUserActivityStats(),
-        fetchBookListingsStats(),
-      ]);
-      setLoading(false);
+      setError(null);
+      try {
+        await Promise.all([
+          fetchSecurityStats(),
+          fetchSecurityEvents(),
+          fetchActivityLogs(),
+        ]);
+      } catch (error) {
+        console.error("Error loading security data:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (userInfo?.token) {
+    if (userInfo) {
       loadSecurityData();
     }
-  }, [userInfo?.token]);
+  }, [userInfo]);
 
   const refreshData = async () => {
     setLoading(true);
-    await Promise.all([
-      fetchSecurityMetrics(),
-      fetchUserActivityStats(),
-      fetchBookListingsStats(),
-    ]);
-    setLoading(false);
+    setError(null);
+    try {
+      await Promise.all([
+        fetchSecurityStats(),
+        fetchSecurityEvents(),
+        fetchActivityLogs(),
+      ]);
+    } catch (error) {
+      console.error("Error refreshing security data:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
-    securityMetrics,
-    userActivityStats,
-    bookListingsStats,
+    securityStats,
+    securityEvents,
+    activityLogs,
     loading,
     error,
     refreshData,
+    fetchActivityLogs,
   };
 };
 

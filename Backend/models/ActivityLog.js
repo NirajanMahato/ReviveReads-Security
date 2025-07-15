@@ -5,16 +5,13 @@ const activityLogSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     userEmail: {
       type: String,
-      required: true,
     },
     userRole: {
       type: String,
-      enum: ["user", "admin"],
-      required: true,
+      enum: ["user", "admin", "anonymous"],
     },
     action: {
       type: String,
@@ -90,7 +87,6 @@ const activityLogSchema = new mongoose.Schema(
     },
     userAgent: {
       type: String,
-      required: true,
     },
     deviceFingerprint: {
       type: String,

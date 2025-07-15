@@ -50,6 +50,7 @@ const getActivityLogs = async (req, res) => {
     ]);
 
     const totalPages = Math.ceil(total / limit);
+    console.log(logs, "logs");
 
     res.status(200).json({
       logs,

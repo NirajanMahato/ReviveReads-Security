@@ -27,7 +27,7 @@ const morganMiddleware = morgan("combined", {
 // Rate limiter for authentication routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: 6,
   message: "Too many attempts, please try again later.",
 });
 

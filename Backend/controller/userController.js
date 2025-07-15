@@ -41,7 +41,10 @@ const getCurrentUser = async (req, res) => {
 // Logout endpoint to clear cookies
 const logout = async (req, res) => {
   try {
-    await logAuditEvent(req, req.userId, "LOGOUT", "auth", {});
+    await logUserActivity(req, res, "LOGOUT", "auth", {
+      resourceId: req.userId,
+      details: {},
+    });
     res.clearCookie("token");
     res.clearCookie("userId");
     res.status(200).json({ message: "Logged out successfully" });
@@ -145,6 +148,11 @@ const signIn = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
+      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "Invalid Credentials", email },
+      });
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
@@ -201,7 +209,10 @@ const signIn = async (req, res) => {
         html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
       });
 
-      await logAuditEvent(req, existingUser._id, "LOGIN_SUCCESS", "auth", {});
+      await logUserActivity(req, res, "LOGIN_SUCCESS", "auth", {
+        resourceId: existingUser._id,
+        details: { loginMethod: "2FA" },
+      });
 
       return res.status(200).json({
         message: "OTP sent to your email. Please verify to continue.",
@@ -226,8 +237,10 @@ const signIn = async (req, res) => {
             "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
         });
       }
-      await logAuditEvent(req, existingUser._id, "LOGIN_FAILED", "auth", {
-        email,
+      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
+        status: "failed",
+        severity: "medium",
+        details: { reason: "Invalid Credentials", email },
       });
       return res.status(400).json({ message: "Invalid Credentials" });
     }
@@ -359,7 +372,10 @@ const updateData = async (req, res) => {
     if (req.file) updateFields.avatar = req.file.filename;
 
     const data = await User.findByIdAndUpdate(id, updateFields, { new: true }); // { new: true }: Returns the updated document.
-    await logAuditEvent(req, id, "PROFILE_UPDATE", "user", updateFields);
+    await logUserActivity(req, res, "PROFILE_UPDATE", "user", {
+      resourceId: id,
+      details: updateFields,
+    });
     res.status(200).json({ message: "User updated successfully", data });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -425,6 +441,10 @@ const forgotPassword = async (req, res) => {
         <p>This link will expire in 15 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
       `,
+    });
+
+    await logUserActivity(req, res, "PASSWORD_RESET_REQUEST", "auth", {
+      details: { email: req.body.email },
     });
 
     res.status(200).json({
@@ -501,6 +521,10 @@ const resetPassword = async (req, res) => {
         html: `<h2>Your password has been changed successfully.</h2><p>If you did not perform this action, please reset your password immediately or contact support.</p>`,
       });
     } catch (err) {}
+
+    await logUserActivity(req, res, "PASSWORD_RESET_SUCCESS", "auth", {
+      details: { email: req.body.email },
+    });
 
     res.status(200).json({
       success: true,

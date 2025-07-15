@@ -1,65 +1,20 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
 import { format } from "date-fns";
-import React, { useContext, useState } from "react";
-import { Bar, Doughnut, Line } from "react-chartjs-2";
-import {
-  FaClock,
-  FaDownload,
-  FaExclamationTriangle,
-  FaEye,
-  FaNetworkWired,
-  FaShieldAlt,
-  FaUserLock,
-  FaUserShield,
-} from "react-icons/fa";
+import React, { useState } from "react";
+import { FaDownload, FaEye } from "react-icons/fa";
 import { GrRefresh } from "react-icons/gr";
-import { UserContext } from "../../../context/UserContext";
-import useSecurityMetrics from "../../../hooks/useSecurityMetrics";
 import useSecurityMonitoring from "../../../hooks/useSecurityMonitoring";
 import DataTable from "../../../shared/DataTable/DataTable";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
-
 const SecurityDashboard = () => {
-  const { userInfo } = useContext(UserContext);
   const {
     securityStats,
-    securityEvents,
     activityLogs,
     loading,
     error,
     refreshData,
     fetchActivityLogs,
   } = useSecurityMonitoring();
-
-  const {
-    securityMetrics: metricsData,
-    loading: metricsLoading,
-    error: metricsError,
-    refreshMetrics,
-  } = useSecurityMetrics();
 
   const [filters, setFilters] = useState({
     severity: "",
@@ -76,15 +31,15 @@ const SecurityDashboard = () => {
 
   const handleRefresh = () => {
     refreshData();
-    refreshMetrics();
   };
 
   const exportLogs = async () => {
     try {
       const response = await fetch("/api/activity-logs/export?format=csv", {
-        credentials: "include",
+        withCredentials: true,
       });
       const blob = await response.blob();
+      console.log(blob, "blob");
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -95,7 +50,7 @@ const SecurityDashboard = () => {
     }
   };
 
-  // Security Summary Cards - using securityStats from real data
+  // Only keep Total Activities card
   const securityCards = [
     {
       id: 1,
@@ -105,261 +60,10 @@ const SecurityDashboard = () => {
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
     },
-    {
-      id: 2,
-      title: "Security Events",
-      value: securityStats?.securityEvents || 0,
-      icon: <FaExclamationTriangle className="text-red-500" />,
-      bgColor: "bg-red-50",
-      borderColor: "border-red-200",
-    },
-    {
-      id: 3,
-      title: "High Severity",
-      value:
-        securityStats?.severityStats?.find((s) => s._id === "high")?.count || 0,
-      icon: <FaShieldAlt className="text-orange-500" />,
-      bgColor: "bg-orange-50",
-      borderColor: "border-orange-200",
-    },
-    {
-      id: 4,
-      title: "Critical Events",
-      value:
-        securityStats?.severityStats?.find((s) => s._id === "critical")
-          ?.count || 0,
-      icon: <FaUserShield className="text-purple-500" />,
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
-    },
   ];
 
-  // Real-time Security Metrics Cards
-  const realTimeCards = [
-    {
-      id: 1,
-      title: "Failed Logins (1h)",
-      value: metricsData?.failedLogins || 0,
-      icon: <FaUserLock className="text-red-500" />,
-      bgColor: "bg-red-50",
-      borderColor: "border-red-200",
-      alert: (metricsData?.failedLogins || 0) > 5,
-    },
-    {
-      id: 2,
-      title: "Suspicious Activities (1h)",
-      value: metricsData?.suspiciousActivities || 0,
-      icon: <FaExclamationTriangle className="text-orange-500" />,
-      bgColor: "bg-orange-50",
-      borderColor: "border-orange-200",
-      alert: (metricsData?.suspiciousActivities || 0) > 0,
-    },
-    {
-      id: 3,
-      title: "Rate Limit Violations (1h)",
-      value: metricsData?.rateLimitViolations || 0,
-      icon: <FaNetworkWired className="text-yellow-500" />,
-      bgColor: "bg-yellow-50",
-      borderColor: "border-yellow-200",
-      alert: (metricsData?.rateLimitViolations || 0) > 10,
-    },
-    {
-      id: 4,
-      title: "Locked Accounts",
-      value: metricsData?.lockedAccounts || 0,
-      icon: <FaUserLock className="text-gray-500" />,
-      bgColor: "bg-gray-50",
-      borderColor: "border-gray-200",
-      alert: (metricsData?.lockedAccounts || 0) > 0,
-    },
-  ];
-
-  // System Health Cards
-  const systemHealthCards = [
-    {
-      id: 1,
-      title: "Total Users",
-      value: metricsData?.totalUsers || 0,
-      icon: <FaEye className="text-green-500" />,
-      bgColor: "bg-green-50",
-      borderColor: "border-green-200",
-    },
-    {
-      id: 2,
-      title: "Active Users",
-      value: metricsData?.activeUsers || 0,
-      icon: <FaUserShield className="text-blue-500" />,
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
-    },
-    {
-      id: 3,
-      title: "Active Rate",
-      value:
-        (metricsData?.totalUsers || 0) > 0
-          ? `${Math.round(
-              ((metricsData?.activeUsers || 0) /
-                (metricsData?.totalUsers || 1)) *
-                100
-            )}%`
-          : "0%",
-      icon: <FaClock className="text-purple-500" />,
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
-    },
-  ];
-
-  // Chart Data - using real data from securityStats
-  const hourlyActivityData = {
-    labels: securityStats?.hourlyStats?.map((stat) => `${stat._id}:00`) || [
-      "00:00",
-      "06:00",
-      "12:00",
-      "18:00",
-    ],
-    datasets: [
-      {
-        label: "Activities per Hour",
-        data: securityStats?.hourlyStats?.map((stat) => stat.count) || [
-          0, 0, 0, 0,
-        ],
-        backgroundColor: "rgba(59, 130, 246, 0.6)",
-        borderColor: "rgba(59, 130, 246, 1)",
-        borderWidth: 2,
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const severityDistributionData = {
-    labels: securityStats?.severityStats?.map((stat) =>
-      stat._id.toUpperCase()
-    ) || ["Low", "Medium", "High", "Critical"],
-    datasets: [
-      {
-        data: securityStats?.severityStats?.map((stat) => stat.count) || [
-          0, 0, 0, 0,
-        ],
-        backgroundColor: [
-          "rgba(34, 197, 94, 0.8)", // Green for low
-          "rgba(59, 130, 246, 0.8)", // Blue for medium
-          "rgba(249, 115, 22, 0.8)", // Orange for high
-          "rgba(239, 68, 68, 0.8)", // Red for critical
-        ],
-        borderWidth: 2,
-        borderColor: "#ffffff",
-      },
-    ],
-  };
-
-  const topActionsData = {
-    labels: securityStats?.topActions?.map((action) =>
-      action._id.replace(/_/g, " ")
-    ) || ["Login", "Book Create", "Profile Update"],
-    datasets: [
-      {
-        label: "Action Count",
-        data: securityStats?.topActions?.map((action) => action.count) || [
-          0, 0, 0,
-        ],
-        backgroundColor: "rgba(147, 51, 234, 0.6)",
-        borderColor: "rgba(147, 51, 234, 1)",
-        borderWidth: 2,
-      },
-    ],
-  };
-
-  const securityEventTrendsData = {
-    labels: metricsData?.securityEventTrends?.map((trend) => trend._id) || [
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-      "Sun",
-    ],
-    datasets: [
-      {
-        label: "Security Events",
-        data: metricsData?.securityEventTrends?.map((trend) => trend.count) || [
-          0, 0, 0, 0, 0, 0, 0,
-        ],
-        backgroundColor: "rgba(239, 68, 68, 0.6)",
-        borderColor: "rgba(239, 68, 68, 1)",
-        borderWidth: 2,
-        tension: 0.4,
-      },
-    ],
-  };
-
-  // Table Columns for Security Events
   const columnHelper = createColumnHelper();
-  const securityEventColumns = [
-    columnHelper.accessor("createdAt", {
-      header: "Timestamp",
-      cell: (info) => {
-        const dateValue = info.getValue();
-        if (!dateValue) return "N/A";
-        try {
-          const date = new Date(dateValue);
-          if (isNaN(date.getTime())) return "Invalid Date";
-          return format(date, "dd MMM yyyy, HH:mm:ss");
-        } catch (error) {
-          return "Invalid Date";
-        }
-      },
-    }),
-    columnHelper.accessor("userEmail", {
-      header: "User",
-      cell: (info) => info.getValue() || "Anonymous",
-    }),
-    columnHelper.accessor("action", {
-      header: "Action",
-      cell: (info) => {
-        const action = info.getValue();
-        return action ? action.replace(/_/g, " ") : "N/A";
-      },
-    }),
-    columnHelper.accessor("severity", {
-      header: "Severity",
-      cell: (info) => {
-        const severity = info.getValue();
-        if (!severity) return "N/A";
-        const colors = {
-          low: "text-green-700 bg-green-100",
-          medium: "text-blue-700 bg-blue-100",
-          high: "text-orange-700 bg-orange-100",
-          critical: "text-red-700 bg-red-100",
-        };
-        return (
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded-full ${
-              colors[severity] || "text-gray-700 bg-gray-100"
-            }`}
-          >
-            {severity.toUpperCase()}
-          </span>
-        );
-      },
-    }),
-    columnHelper.accessor("ipAddress", {
-      header: "IP Address",
-      cell: (info) => info.getValue() || "N/A",
-    }),
-    columnHelper.accessor("details", {
-      header: "Details",
-      cell: (info) => {
-        const details = info.getValue();
-        if (typeof details === "object" && details !== null) {
-          return details?.reason || details?.method || "N/A";
-        }
-        return details || "N/A";
-      },
-    }),
-  ];
 
-  // Table Columns for Activity Logs
   const activityLogColumns = [
     columnHelper.accessor("createdAt", {
       header: "Timestamp",
@@ -436,29 +140,7 @@ const SecurityDashboard = () => {
     }),
   ];
 
-  // Table Columns for Suspicious IPs
-  const suspiciousIPColumns = [
-    columnHelper.accessor("_id", {
-      header: "IP Address",
-      cell: (info) => info.getValue() || "N/A",
-    }),
-    columnHelper.accessor("count", {
-      header: "Event Count",
-      cell: (info) => info.getValue() || 0,
-    }),
-    columnHelper.accessor("actions", {
-      header: "Actions",
-      cell: (info) => {
-        const actions = info.getValue();
-        if (!Array.isArray(actions)) return "N/A";
-        return (
-          actions.slice(0, 3).join(", ") + (actions.length > 3 ? "..." : "")
-        );
-      },
-    }),
-  ];
-
-  if (loading || metricsLoading) {
+  if (loading) {
     return (
       <div className="px-4 py-1.5 bg-gray-100 min-h-screen">
         <div className="flex items-center justify-center h-64">
@@ -468,13 +150,12 @@ const SecurityDashboard = () => {
     );
   }
 
-  if (error || metricsError) {
+  if (error) {
     return (
       <div className="px-4 py-1.5 bg-gray-100 min-h-screen">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700">
-            Error loading security data:{" "}
-            {error?.message || metricsError?.message}
+            Error loading security data: {error?.message}
           </p>
         </div>
       </div>
@@ -521,54 +202,7 @@ const SecurityDashboard = () => {
         </div>
       </div>
 
-      {/* Real-time Security Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {realTimeCards.map((card) => (
-          <div
-            key={card.id}
-            className={`${card.bgColor} border ${
-              card.borderColor
-            } rounded-lg p-6 shadow-sm relative ${
-              card.alert ? "ring-2 ring-red-200" : ""
-            }`}
-          >
-            {card.alert && (
-              <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-            )}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  {card.title}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-              </div>
-              <div className="text-2xl">{card.icon}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* System Health Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {systemHealthCards.map((card) => (
-          <div
-            key={card.id}
-            className={`${card.bgColor} border ${card.borderColor} rounded-lg p-6 shadow-sm`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  {card.title}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-              </div>
-              <div className="text-2xl">{card.icon}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Security Summary Cards */}
+      {/* Only show Total Activities card */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {securityCards.map((card) => (
           <div
@@ -588,86 +222,7 @@ const SecurityDashboard = () => {
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">24-Hour Activity Trend</h3>
-          <Line
-            data={hourlyActivityData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  display: false,
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-          />
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            Security Event Trends (7 Days)
-          </h3>
-          <Line
-            data={securityEventTrendsData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  display: false,
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Suspicious IP Addresses */}
-      {securityStats?.topSuspiciousIPs?.length > 0 && (
-        <div className="bg-white rounded-lg shadow mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Top Suspicious IP Addresses (24h)
-            </h3>
-          </div>
-          <div className="p-6">
-            <DataTable
-              data={securityStats?.topSuspiciousIPs}
-              columns={suspiciousIPColumns}
-              pagination={false}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Security Events Table */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Recent Security Events
-          </h3>
-        </div>
-        <div className="p-6">
-          <DataTable
-            data={securityEvents}
-            columns={securityEventColumns}
-            pagination={false}
-          />
-        </div>
-      </div>
-
-      {/* Activity Logs with Filters */}
+      {/* Only show Activity Logs table */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">

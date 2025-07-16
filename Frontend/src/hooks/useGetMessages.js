@@ -1,12 +1,11 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "../context/UserContext";
+import { useEffect, useState } from "react";
+import { decryptMessage } from "../utils/crypto";
 import useConversation from "../zustand/useConverstaion";
 
 const useGetMessages = () => {
   const [loading, setLoading] = useState(false);
   const { messages, setMessages, selectedConversation } = useConversation();
-  const { userInfo } = useContext(UserContext);
 
   useEffect(() => {
     const getMessages = async () => {
@@ -14,11 +13,13 @@ const useGetMessages = () => {
       try {
         const res = await axios.get(
           `/api/messages/${selectedConversation._id}`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
-        setMessages(res.data);
+        const decrypted = res.data.map((msg) => ({
+          ...msg,
+          message: decryptMessage(msg.message),
+        }));
+        setMessages(decrypted);
       } catch (error) {
         console.error(error);
       } finally {

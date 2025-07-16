@@ -1,26 +1,25 @@
 import axios from "axios";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
-import { UserContext } from "../context/UserContext";
+import { encryptMessage } from "../utils/crypto";
 import useConversation from "../zustand/useConverstaion";
 
 const useSendMessage = () => {
   const [loading, setLoading] = useState(false);
   const { messages, setMessages, selectedConversation } = useConversation();
-  const { userInfo } = useContext(UserContext);
 
   const sendMessage = async (message) => {
     setLoading(true);
     try {
+      const encrypted = encryptMessage(message);
       const res = await axios.post(
         `/api/messages/send/${selectedConversation._id}`,
-        { message },
-        {
-          withCredentials: true,
-        }
+        { message: encrypted },
+        { withCredentials: true }
       );
 
-      setMessages([...messages, res.data]);
+      const decrypted = { ...res.data, message };
+      setMessages([...messages, decrypted]);
       toast.success("Message sent!");
     } catch (error) {
       console.error(error);

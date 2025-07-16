@@ -1,6 +1,7 @@
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const { getReceiverSocketId, io } = require("../socket/socket");
+const { encryptMessage, decryptMessage } = require("../utils/crypto");
 
 const sendMessage = async (req, res) => {
   try {
@@ -18,10 +19,11 @@ const sendMessage = async (req, res) => {
       });
     }
 
+    const encryptedMessage = encryptMessage(message);
     const newMessage = new Message({
       senderId,
       receiverId,
-      message,
+      message: encryptedMessage,
       read: false,
     });
 
@@ -63,8 +65,11 @@ const getMessages = async (req, res) => {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("updateUnreadMessages", false);
     }
-
-    res.status(200).json(conversation.messages);
+    const decryptedMessages = conversation.messages.map((msg) => ({
+      ...msg,
+      message: decryptMessage(msg.message),
+    }));
+    res.status(200).json(decryptedMessages);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });

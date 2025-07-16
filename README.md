@@ -354,12 +354,34 @@ The Security Monitoring Dashboard provides comprehensive real-time monitoring of
 - Automatic user account creation for new Google users.
 - Secure token verification on backend.
 
-### 24. **Real-time Messaging System**
+### 24. **Message Encryption & Decryption with CryptoJS**
 
 - WebSocket-based real-time messaging between users.
 - Secure socket authentication and message validation.
 - Message history and conversation management.
 - Real-time notifications for new messages.
+
+- All chat messages are encrypted before transmission using AES encryption via [CryptoJS](https://www.npmjs.com/package/crypto-js).
+- Messages are decrypted on the receiving end using the same secret key.
+- This ensures that message content is protected during transit, even if intercepted.
+
+**How it works:**
+
+1. **Encryption (before sending):**
+   ```js
+   import CryptoJS from "crypto-js";
+   const secretKey = "your-very-secure-key";
+   const message = "Hello, this is a secret chat message!";
+   const ciphertext = CryptoJS.AES.encrypt(message, secretKey).toString();
+   // Send ciphertext
+   ```
+2. **Decryption (after receiving):**
+   ```js
+   import CryptoJS from "crypto-js";
+   const bytes = CryptoJS.AES.decrypt(ciphertext, secretKey);
+   const originalText = bytes.toString(CryptoJS.enc.Utf8);
+   // Use originalText
+   ```
 
 ### 25. **Enhanced State Management**
 
@@ -411,7 +433,7 @@ The Security Monitoring Dashboard provides comprehensive real-time monitoring of
 
 ---
 
-## Authors
+## Author
 
 - Nirajan Mahato
 

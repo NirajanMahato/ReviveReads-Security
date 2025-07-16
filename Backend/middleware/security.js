@@ -29,6 +29,13 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 6,
   message: "Too many attempts, please try again later.",
+  keyGenerator: (req, res) => {
+    // Use email for login attempts if present, otherwise fallback to IP
+    if (req.body && req.body.email) {
+      return req.body.email.toLowerCase();
+    }
+    return req.ip;
+  },
 });
 
 function applySecurityMiddlewares(app) {

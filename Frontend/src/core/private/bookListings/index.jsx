@@ -73,6 +73,9 @@ const BookListings = () => {
         `/api/book/approve-book/${bookId}`,
         { status },
         {
+          withCredentials: true,
+        },
+        {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
           },

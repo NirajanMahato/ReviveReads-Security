@@ -67,6 +67,12 @@ const updateBookApprovalStatus = async (req, res) => {
     const { bookId } = req.params;
     const { status } = req.body;
 
+    if (!status || typeof status !== "string") {
+      return res
+        .status(400)
+        .json({ message: "Status is required and must be a string." });
+    }
+
     const book = await Book.findById(bookId).populate("seller");
 
     if (!book) {
@@ -77,9 +83,7 @@ const updateBookApprovalStatus = async (req, res) => {
     book.approvalDate = new Date();
     await book.save();
 
-    const message = `Your book "${
-      book.title
-    }" has been ${status.toLowerCase()} by the admin.`;
+    const message = `Your book "${book.title}" has been ${status} by the admin.`;
     const notification = await createNotification(
       book.seller._id.toString(),
       "BOOK_APPROVAL",
@@ -95,7 +99,7 @@ const updateBookApprovalStatus = async (req, res) => {
     }
 
     res.status(200).json({
-      message: `Book ${status.toLowerCase()} successfully!`,
+      message: `Book ${status} successfully!`,
       data: book,
     });
   } catch (error) {

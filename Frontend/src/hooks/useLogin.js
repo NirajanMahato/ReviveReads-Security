@@ -33,10 +33,30 @@ const useLogin = () => {
       } else {
         navigate("/");
       }
+
       return { twoFactorRequired: false };
     } catch (error) {
-      toast.error(error.response?.data.message || "Login failed!");
-      return { twoFactorRequired: false, error: true };
+      const status = error.response?.status;
+      const errorMessage = error.response?.data?.message || "Login failed!";
+
+      // Distinguish between invalid credentials and lockout
+      if (status === 403) {
+        toast.error(
+          "Your account is locked. Please try again after 15 minutes."
+        );
+        return {
+          error: true,
+          errorMessage:
+            "Your account is locked. Please try again after 15 minutes.",
+        };
+      }
+
+      toast.error(errorMessage);
+      return {
+        twoFactorRequired: false,
+        error: true,
+        errorMessage,
+      };
     }
   };
 

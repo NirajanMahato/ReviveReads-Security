@@ -25,6 +25,10 @@ const userSchema = mongoose.Schema(
       default: "Away",
     },
     lastActivity: { type: Date, default: Date.now },
+    lockoutNotified: {
+      type: Boolean,
+      default: false,
+    },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     twoFactorOTP: String,

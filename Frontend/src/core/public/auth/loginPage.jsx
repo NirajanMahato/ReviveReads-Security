@@ -38,6 +38,7 @@ const LoginPage = () => {
   const [otpEmail, setOtpEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState(""); // <-- Add state for login error
   const { login } = useLogin();
   const googleBtnRef = useRef(null);
   const dispatch = useDispatch();
@@ -113,8 +114,12 @@ const LoginPage = () => {
 
   const submit = async (data) => {
     setLoading(true);
+    setLoginError(""); // Clear previous error
     const result = await login(data);
     setLoading(false);
+    if (result?.error && result?.errorMessage) {
+      setLoginError(result.errorMessage); // Set error from backend
+    }
     if (result?.twoFactorRequired) {
       setTwoFactorRequired(true);
       setOtpEmail(result.user.email);
@@ -166,6 +171,11 @@ const LoginPage = () => {
                 Welcome to ReviveReads
               </h1>
               <h3>Please enter your credentials.</h3>
+              {loginError && (
+                <div className="md:w-6/12 w-11/12 text-red-500 text-center text-sm mb-2">
+                  {loginError}
+                </div>
+              )}
               <div
                 className={
                   "md:w-6/12 w-11/12 h-12 border-solid border rounded-3xl border-gray-300 mt-14 flex items-center pl-4 pr-2"

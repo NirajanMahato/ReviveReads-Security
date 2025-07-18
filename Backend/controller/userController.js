@@ -2,12 +2,19 @@ const asyncHandler = require("../middleware/async");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const Conversation = require("../models/Conversation");
 const mongoose = require("mongoose");
 const { logUserActivity } = require("../middleware/activityLogger");
 const AuditLog = require("../models/AuditLog");
 const { OAuth2Client } = require("google-auth-library");
+const {
+  sendWelcomeEmail,
+  sendOtpEmail,
+  sendLockoutEmail,
+  sendResetPasswordEmail,
+  sendPasswordChangedEmail,
+} = require("../utils/mailer");
+const { validatePassword } = require("../utils/validators");
 
 //Get all users information
 const getAllUsers = async (req, res) => {
@@ -70,17 +77,9 @@ const signUp = async (req, res) => {
         .json({ message: "Password must be at least 8 characters long" });
     }
 
-    // Check for password complexity
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
-      return res.status(400).json({
-        message:
-          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*(),.?":{}|<>)',
-      });
+    const validationError = validatePassword(password);
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
     }
     const hashedPass = await bcrypt.hash(password, 10);
 
@@ -100,25 +99,7 @@ const signUp = async (req, res) => {
     const newUser = new User(userData);
     const data = await newUser.save();
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: "nirajanmahato44@gmail.com",
-      to: email,
-      subject: "Welcome to ReviveReads",
-      html: `
-        <h1>Your Registration has been completed</h1>
-        <p>Your user id is ${newUser.id}</p>
-        `,
-    });
+    await sendWelcomeEmail(email, newUser._id);
 
     await logUserActivity(req, res, "REGISTER", "auth", {
       resourceId: newUser._id,
@@ -141,7 +122,7 @@ const uploadImage = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Sign-In (2FA enabled)
+// Sign-In
 const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -156,58 +137,43 @@ const signIn = async (req, res) => {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
+    // Reset lock if lockout period has expired
+    if (existingUser.lockoutUntil && existingUser.lockoutUntil < Date.now()) {
+      existingUser.failedLoginAttempts = 0;
+      existingUser.lockoutUntil = undefined;
+      existingUser.lockoutNotified = false;
+      await existingUser.save();
+    }
+
+    // Check if account is currently locked
     if (existingUser.lockoutUntil && existingUser.lockoutUntil > Date.now()) {
-      const minutes = Math.ceil(
-        (existingUser.lockoutUntil - Date.now()) / 60000
-      );
-      try {
-        const transporter = nodemailer.createTransport({
-          host: "smtp.gmail.com",
-          port: 587,
-          secure: false,
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        });
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: existingUser.email,
-          subject: "Account Locked - ReviveReads",
-          html: `<h2>Your account has been locked due to multiple failed login attempts.</h2><p>Please try again after 15 minutes. If this wasn't you, please contact support immediately.</p>`,
-        });
-      } catch (err) {}
+      if (!existingUser.lockoutNotified) {
+        await sendLockoutEmail(existingUser.email);
+
+        existingUser.lockoutNotified = true;
+        await existingUser.save();
+      }
+
       return res.status(403).json({
-        message: `Account locked due to multiple failed login attempts. Try again in 15 minutes.`,
+        message:
+          "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
       });
     }
 
+    // Compare password
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (isMatch) {
       existingUser.failedLoginAttempts = 0;
       existingUser.lockoutUntil = undefined;
+      existingUser.lockoutNotified = false;
+
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+      const otpExpiry = Date.now() + 5 * 60 * 1000;
       existingUser.twoFactorOTP = otp;
       existingUser.twoFactorOTPExpires = otpExpiry;
       await existingUser.save();
 
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Your ReviveReads OTP Code",
-        html: `<h2>Your OTP code is: <b>${otp}</b></h2><p>This code will expire in 5 minutes.</p>`,
-      });
+      await sendOtpEmail(email, otp);
 
       await logUserActivity(req, res, "LOGIN_SUCCESS", "auth", {
         resourceId: existingUser._id,
@@ -226,22 +192,23 @@ const signIn = async (req, res) => {
     } else {
       existingUser.failedLoginAttempts =
         (existingUser.failedLoginAttempts || 0) + 1;
-      // Lock account after 5 failed attempts for 15 minutes
+
       if (existingUser.failedLoginAttempts >= 5) {
-        existingUser.lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
-      }
-      await existingUser.save();
-      if (existingUser.lockoutUntil && existingUser.lockoutUntil > Date.now()) {
-        return res.status(403).json({
-          message:
-            "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
+        existingUser.lockoutUntil = Date.now() + 15 * 60 * 1000;
+        existingUser.lockoutNotified = false;
+
+        await logUserActivity(req, res, "ACCOUNT_LOCKED", "auth", {
+          resourceId: existingUser._id,
+          severity: "high",
+          details: {
+            reason: "Exceeded max failed login attempts",
+            email,
+          },
         });
       }
-      await logUserActivity(req, res, "LOGIN_FAILED", "auth", {
-        status: "failed",
-        severity: "medium",
-        details: { reason: "Invalid Credentials", email },
-      });
+
+      await existingUser.save();
+
       return res.status(400).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
@@ -418,31 +385,11 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
+    // Create reset link first
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Password Reset Request",
-      html: `
-        <h1>You requested a password reset</h1>
-        <p>Click this link to reset your password:</p>
-        <a href="${resetUrl}" clicktracking=off>${resetUrl}</a>
-        <p>This link will expire in 15 minutes.</p>
-        <p>If you didn't request this, please ignore this email.</p>
-      `,
-    });
-
+    // Use the reusable mail function
+    await sendResetPasswordEmail(email, resetUrl);
     await logUserActivity(req, res, "PASSWORD_RESET_REQUEST", "auth", {
       details: { email: req.body.email },
     });
@@ -470,17 +417,10 @@ const resetPassword = async (req, res) => {
         .json({ message: "Password must be at least 8 characters long" });
     }
 
-    // Check for password complexity
-    const hasUpperCase = /[A-Z]/.test(newPassword);
-    const hasLowerCase = /[a-z]/.test(newPassword);
-    const hasNumbers = /\d/.test(newPassword);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
-
-    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
-      return res.status(400).json({
-        message:
-          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*(),.?":{}|<>)',
-      });
+    // Enhanced password validation for reset
+    const validationError = validatePassword(newPassword);
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -505,21 +445,7 @@ const resetPassword = async (req, res) => {
     await user.save();
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: user.email,
-        subject: "Password Changed - ReviveReads",
-        html: `<h2>Your password has been changed successfully.</h2><p>If you did not perform this action, please reset your password immediately or contact support.</p>`,
-      });
+      await sendPasswordChangedEmail(user.email);
     } catch (err) {}
 
     await logUserActivity(req, res, "PASSWORD_RESET_SUCCESS", "auth", {

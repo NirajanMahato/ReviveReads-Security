@@ -2,6 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { FaCheck } from "react-icons/fa";
 import { IoMdLock } from "react-icons/io";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import * as yup from "yup";
@@ -34,6 +35,14 @@ const ResetPassword = () => {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [passwordChecks, setPasswordChecks] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false,
+  });
+  const [newPasswordValue, setNewPasswordValue] = useState("");
 
   const {
     register,
@@ -42,6 +51,19 @@ const ResetPassword = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  // Password strength check
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setNewPasswordValue(value);
+    setPasswordChecks({
+      length: value.length >= 8,
+      uppercase: /[A-Z]/.test(value),
+      lowercase: /[a-z]/.test(value),
+      number: /[0-9]/.test(value),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
+    });
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -112,6 +134,8 @@ const ResetPassword = () => {
               placeholder="New Password"
               className="w-full outline-none"
               {...register("newPassword")}
+              value={newPasswordValue}
+              onChange={handlePasswordChange}
             />
           </div>
           {errors.newPassword && (
@@ -123,11 +147,57 @@ const ResetPassword = () => {
             <p className="text-xs text-gray-600">
               Password must contain at least 8 characters, including:
             </p>
-            <ul className="text-xs text-gray-500 ml-4 mt-1">
-              <li>• One uppercase letter (A-Z)</li>
-              <li>• One lowercase letter (a-z)</li>
-              <li>• One number (0-9)</li>
-              <li>• One special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+            <ul className="text-xs text-gray-500 ml-4 mt-1 space-y-1">
+              <li
+                className={`flex items-center ${
+                  passwordChecks.length ? "text-green-600" : ""
+                }`}
+              >
+                {passwordChecks.length && (
+                  <FaCheck className="text-green-500 mr-2" />
+                )}
+                • At least 8 characters
+              </li>
+              <li
+                className={`flex items-center ${
+                  passwordChecks.uppercase ? "text-green-600" : ""
+                }`}
+              >
+                {passwordChecks.uppercase && (
+                  <FaCheck className="text-green-500 mr-2" />
+                )}
+                • One uppercase letter (A-Z)
+              </li>
+              <li
+                className={`flex items-center ${
+                  passwordChecks.lowercase ? "text-green-600" : ""
+                }`}
+              >
+                {passwordChecks.lowercase && (
+                  <FaCheck className="text-green-500 mr-2" />
+                )}
+                • One lowercase letter (a-z)
+              </li>
+              <li
+                className={`flex items-center ${
+                  passwordChecks.number ? "text-green-600" : ""
+                }`}
+              >
+                {passwordChecks.number && (
+                  <FaCheck className="text-green-500 mr-2" />
+                )}
+                • One number (0-9)
+              </li>
+              <li
+                className={`flex items-center ${
+                  passwordChecks.special ? "text-green-600" : ""
+                }`}
+              >
+                {passwordChecks.special && (
+                  <FaCheck className="text-green-500 mr-2" />
+                )}
+                • One special character (!@#$%^&*(),.?":{}|&lt;&gt;)
+              </li>
             </ul>
           </div>
           <div className="w-full h-12 border rounded-3xl border-gray-300 mb-4 flex items-center pl-4 pr-2">

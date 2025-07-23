@@ -1,5 +1,10 @@
 const ActivityLog = require("../models/ActivityLog");
 
+const normalizeIp = (rawIp) => {
+  if (!rawIp) return "unknown";
+  return rawIp === "::1" || rawIp === "::ffff:127.0.0.1" ? "127.0.0.1" : rawIp;
+};
+
 const getActivityLogs = async (req, res) => {
   try {
     const {
@@ -26,7 +31,11 @@ const getActivityLogs = async (req, res) => {
     if (resourceType) filter.resourceType = resourceType;
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
-    if (ipAddress) filter.ipAddress = { $regex: ipAddress, $options: "i" };
+
+    if (ipAddress) {
+      const cleanIp = normalizeIp(ipAddress);
+      filter.ipAddress = { $regex: cleanIp, $options: "i" };
+    }
 
     if (startDate || endDate) {
       filter.createdAt = {};
@@ -228,7 +237,7 @@ const exportActivityLogs = async (req, res) => {
         log.resourceType,
         log.status,
         log.severity,
-        log.ipAddress,
+        normalizeIp(log.ipAddress),
         log.userAgent,
       ]);
 

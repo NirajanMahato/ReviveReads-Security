@@ -5,6 +5,7 @@ const expectCt = require("expect-ct");
 const express = require("express");
 const morgan = require("morgan");
 const winston = require("winston");
+const mongoSanitize = require("express-mongo-sanitize");
 
 const logger = winston.createLogger({
   level: "info",
@@ -80,6 +81,7 @@ function applySecurityMiddlewares(app) {
   app.use(expectCt({ maxAge: 86400, enforce: true }));
   app.use(xss());
   app.use(express.json({ limit: "10mb" }));
+  app.use(mongoSanitize());
 }
 
 module.exports = {

@@ -44,8 +44,11 @@ const logUserActivity = async (
     const userEmail = user.email || req.body?.email || "anonymous";
     const userRole = user.role || "anonymous";
 
+    const xForwardedFor = req.headers["x-forwarded-for"];
     const ipAddress =
-      req.ip || req.connection.remoteAddress || req.headers["x-forwarded-for"];
+      (typeof xForwardedFor === "string" && xForwardedFor.split(",")[0].trim()) ||
+      req.ip ||
+      req.connection.remoteAddress;
     const userAgent = req.get("User-Agent") || "Unknown";
     const deviceFingerprint = req.deviceFingerprint || null;
 
@@ -121,8 +124,11 @@ const logSecurityEvent = async (req, eventType, details = {}) => {
     const userId = user.id || null;
     const userEmail = user.email || req.body?.email || "anonymous";
     const userRole = user.role || "anonymous";
+    const xForwardedFor = req.headers["x-forwarded-for"];
     const ipAddress =
-      req.ip || req.connection.remoteAddress || req.headers["x-forwarded-for"];
+      (typeof xForwardedFor === "string" && xForwardedFor.split(",")[0].trim()) ||
+      req.ip ||
+      req.connection.remoteAddress;
     const userAgent = req.get("User-Agent") || "Unknown";
 
     const activityLog = new ActivityLog({
@@ -170,7 +176,11 @@ const logAllRequests = (req, res, next) => {
     const duration = Date.now() - startTime;
     const user = req.user || {};
     const userEmail = user.email || "anonymous";
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const xForwardedFor = req.headers["x-forwarded-for"];
+    const ipAddress =
+      (typeof xForwardedFor === "string" && xForwardedFor.split(",")[0].trim()) ||
+      req.ip ||
+      req.connection.remoteAddress;
 
     logger.info(
       `[REQUEST] ${req.method} ${req.originalUrl} - User: ${userEmail} - IP: ${ipAddress} - Status: ${res.statusCode} - Duration: ${duration}ms`

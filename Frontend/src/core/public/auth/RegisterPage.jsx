@@ -11,6 +11,7 @@ import useRegister from "../../../hooks/useRegister";
 import loadingGif from "/BG/buttonLoading.gif";
 import wallpaper from "/BG/wallpaper.jpg";
 import logo2 from "/Logos/Logo2.png";
+import { sanitizeUserInput } from "../../../utils/sanitizeHtml";
 
 const schema = yup
   .object({
@@ -87,7 +88,8 @@ const RegisterPage = () => {
   }, [password]);
 
   const submit = async (data) => {
-    await registerUser(data);
+    const cleanData = sanitizeUserInput(data);
+  await registerUser(cleanData);
   };
 
   return (

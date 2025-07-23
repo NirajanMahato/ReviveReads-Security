@@ -1,19 +1,22 @@
-import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import axios from "axios";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { MdEmail } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import axios from "axios";
-import logo2 from "/Logos/Logo2.png";
+import * as yup from "yup";
+import { sanitizeText, sanitizeUserInput } from "../../../utils/sanitizeHtml";
 import loadingGif from "/BG/buttonLoading.gif";
+import logo2 from "/Logos/Logo2.png";
 
-const schema = yup.object({
-  email: yup
-    .string()
-    .required("Email is required")
-    .email("Enter a valid email address"),
-}).required();
+const schema = yup
+  .object({
+    email: yup
+      .string()
+      .required("Email is required")
+      .email("Enter a valid email address"),
+  })
+  .required();
 
 const ForgotPassword = () => {
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -30,12 +33,17 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.post("/api/user/forgot-password", data);
+
+      const cleanData = sanitizeUserInput(data);
+
+      const response = await axios.post("/api/user/forgot-password", cleanData);
       if (response.data.success) {
         setIsEmailSent(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred");
+      setError(
+        sanitizeText(err.response?.data?.message || "An error occurred")
+      );
     } finally {
       setLoading(false);
     }
@@ -47,7 +55,8 @@ const ForgotPassword = () => {
         <div className="max-w-md w-full text-center">
           <h2 className="text-2xl font-bold mb-4">Check Your Email</h2>
           <p className="text-gray-600 mb-4">
-            We've sent password reset instructions to your email address. Please check your inbox.
+            We've sent password reset instructions to your email address. Please
+            check your inbox.
           </p>
           <Link
             to="/login"
@@ -66,19 +75,18 @@ const ForgotPassword = () => {
         <Link to="/" className="-mt-2">
           <img src={logo2} alt="Logo" className="cursor-pointer md:w-44 w-28" />
         </Link>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="mt-16">
           <h1 className="text-2xl md:text-3xl font-ppMori mb-4 text-center">
             Forgot Password
           </h1>
           <p className="text-gray-600 text-center mb-8">
-            Enter your email address and we'll send you instructions to reset your password.
+            Enter your email address and we'll send you instructions to reset
+            your password.
           </p>
 
           {error && (
-            <div className="mb-4 text-red-500 text-center text-sm">
-              {error}
-            </div>
+            <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
           )}
 
           <div className="w-full h-12 border rounded-3xl border-gray-300 mb-4 flex items-center pl-4 pr-2">

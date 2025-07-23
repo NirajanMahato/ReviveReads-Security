@@ -6,6 +6,7 @@ import { FaCheck } from "react-icons/fa";
 import { IoMdLock } from "react-icons/io";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import * as yup from "yup";
+import { sanitizeText, sanitizeUserInput } from "../../../utils/sanitizeHtml";
 import loadingGif from "/BG/buttonLoading.gif";
 import logo2 from "/Logos/Logo2.png";
 
@@ -69,9 +70,11 @@ const ResetPassword = () => {
     try {
       setLoading(true);
       setError("");
+
+      const cleanData = sanitizeUserInput(data);
       const response = await axios.post("/api/user/reset-password", {
         token,
-        newPassword: data.newPassword,
+        newPassword: cleanData.newPassword,
       });
 
       if (response.data.success) {
@@ -81,7 +84,9 @@ const ResetPassword = () => {
         }, 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred");
+      setError(
+        sanitizeText(err.response?.data?.message || "An error occurred")
+      );
     } finally {
       setLoading(false);
     }

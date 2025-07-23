@@ -89,6 +89,11 @@ A secure, full-stack book marketplace application built with React frontend and 
   - System health monitoring
   - Export and reporting capabilities
 
+- **NoSQL Injection Protection**
+  - Uses `express-mongo-sanitize` to strip malicious operators (like `$where`) from user input.
+  - Prevents unauthorized query execution and data leakage.
+
+
 ## 🛠 Tech Stack
 
 ### Frontend
@@ -149,6 +154,34 @@ A secure, full-stack book marketplace application built with React frontend and 
 - WebSocket authentication
 - Message validation
 - User status tracking
+
+### NoSQL Injection Protection with `express-mongo-sanitize`
+
+To defend against NoSQL query injection attacks, the application uses the `express-mongo-sanitize` middleware. This type of attack occurs when a malicious user provides input containing MongoDB operators (like `$gt`, `$ne`, or `$where`) which can alter the logic of a database query, potentially leading to data leaks or unauthorized access.
+
+**How it works:**
+
+The `express-mongo-sanitize` middleware automatically scans the request body, query parameters, and URL parameters (`req.body`, `req.query`, `req.params`) for any keys that start with a `$` character or contain a `.`. It then strips these keys and their corresponding values from the input, effectively neutralizing the malicious query operators before they reach the database driver.
+
+For example, a malicious query like:
+`GET /api/books?price={"$gt":""}`
+
+would be sanitized to remove the `$gt` operator, preventing the intended query manipulation.
+
+**Implementation:**
+
+The middleware is applied globally in the main application file (`server.js`):
+
+```javascript
+const mongoSanitize = require('express-mongo-sanitize');
+
+// ...
+
+// Sanitize data against NoSQL query injection
+app.use(mongoSanitize());
+```
+
+This provides a critical layer of defense, ensuring that user input cannot be used to execute unintended database operations.
 
 ### Security Monitoring Dashboard
 

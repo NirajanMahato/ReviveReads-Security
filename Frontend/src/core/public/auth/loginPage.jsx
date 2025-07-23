@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import * as yup from "yup";
 import useLogin from "../../../hooks/useLogin";
 import { authActions } from "../../../store/auth";
+import { sanitizeUserInput } from "../../../utils/sanitizeHtml";
 import loadingGif from "/BG/buttonLoading.gif";
 import wallpaper from "/BG/wallpaper.jpg";
 import logo2 from "/Logos/Logo2.png";
@@ -114,8 +115,9 @@ const LoginPage = () => {
 
   const submit = async (data) => {
     setLoading(true);
-    setLoginError(""); // Clear previous error
-    const result = await login(data);
+    setLoginError("");
+    const sanitizedData = sanitizeUserInput(data);
+    const result = await login(sanitizedData);
     setLoading(false);
     if (result?.error && result?.errorMessage) {
       setLoginError(result.errorMessage); // Set error from backend

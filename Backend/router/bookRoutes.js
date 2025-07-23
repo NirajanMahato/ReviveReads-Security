@@ -57,7 +57,14 @@ router.patch(
 router.get("/sold", authenticateToken, getSoldBook);
 
 // Update book routes with compression
-router.post("/post-book", sanitizeInput, uploadLimiter, uploadBookImages, authenticateToken, postBook);
+router.post(
+  "/post-book",
+  sanitizeInput,
+  uploadLimiter,
+  uploadBookImages,
+  authenticateToken,
+  postBook
+);
 router.patch(
   "/update-book/:bookId",
   sanitizeInput,

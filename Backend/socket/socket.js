@@ -32,7 +32,6 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
   const token = socket.handshake.auth.token;
 
-  // Basic validation - in production, verify JWT token here
   if (userId && userId !== "undefined" && token) {
     userSocketMap[userId] = socket.id;
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
